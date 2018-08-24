@@ -1,0 +1,9 @@
+{
+  "registry-mirrors": [
+    "https://registry.docker-cn.com"
+  ],
+ "selinux-enabled": false,
+ "insecure-registries":[
+    "192.168.7.234:5000"
+  ]
+}
