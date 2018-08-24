@@ -29,6 +29,22 @@ docker container ls -aq                                 # 拿到所有运行及�
 docker container ls -a |awk '{print $1}'                # 拿到所有运行及退出的容器id
 docker rm  $(docker container ls -aq)  					# 批量删除所有的容器
 docker rm  $(docker container ls -f "status=exited" -q) # 批量删除所有退出的容器
+docker exec  -it 容器id /bin/bash  ## 进入容器内部，进入bash shell
+docker container stop  容器id                             # 停止容器
+docker stop  容器id                                       # 停止容器
+docker rm   容器id                                        # 删除指定id的容器
+docker run -d  --name=demo peterhly/flask-hello-world     #  --name指定容器的名称
+docker stop demo                                          # 根据名称来停止容器
+docker start demo                                         # 根据名称来启动容器
+docker inspect 容器id                                     # 查看指定容器的详细信息
+docker logs 容器id                                        # 查看指定容器的日志信息
+=============  资源限制 =======================
+docker run --memory=200M  peterhly/ubuntu-stree --vm 1 --verbose   # 默认--memory和swap相同
+另开启一个shell，需要停止这个容器docker stop 容器id
+docker run --memory=200M  peterhly/ubuntu-stree --vm 1 --verbose --vm-bytes 500M 此时会退出，因为已经设置了container的内存大小
+开启3个shell,cpu-shares 代表的是cpu所占资源的权重
+docker run --cpu-shares=10 --name=test1 peterhly/ubuntu-stree --cpu 1   #第一个shell运行
+docker run --cpu-shares=5 --name=test2 peterhly/ubuntu-stree --cpu 1    #第二个shell运行	
 ```
 ## Docker 镜像发布
 

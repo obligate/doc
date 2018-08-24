@@ -104,10 +104,16 @@ RUN yum install -y vim
 docker build -t peterhly/centos-vim-new .
 ```
 ### 5. flask-hello-world
+将fdockerlask-hello-world打包到容器，进行访问
 ```
 docker\labs\02-docker\flask-hello-world
 docker build -t peterhly/flask-hello-world .
-
+如果报错，可以通过以下方式调试
+docker run -it 报错临时生成的imageid /bin/bash   #通过报错临时生成的imageid使用bash进入
+=============
+docker run peterhly/flask-hello-world         ##启动container
+docker run -d peterhly/flask-hello-world      ##后台运行container，使用-d
+docker ps 
 ```
 
 
