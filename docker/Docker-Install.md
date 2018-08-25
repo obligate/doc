@@ -8,10 +8,18 @@ lsb_release -a
 sudo yum remove docker  docker-client  docker-client-latest  docker-common  docker-latest docker-latest-logrotate docker-logrotate  docker-selinux  docker-engine-selinux  docker-engine
 sudo yum install -y yum-utils device-mapper-persistent-data lvm2
 sudo yum-config-manager  --add-repo   https://download.docker.com/linux/centos/docker-ce.repo
-sudo yum install docker-ce
+sudo yum install docker-ce -y
 sudo systemctl start docker
 ```
-
+### 修改Docker本地镜像与容器的存储位置的方法
+[容器存储](https://docs.docker.com/storage/#choose-the-right-type-of-mount)
+```
+sudo docker info | grep "Docker Root Dir"             # 可以通过该命令查看具体位置,默认情况下Docker的存放位置为：/var/lib/docker
+systemctl stop docker
+mv /var/lib/docker /mnt/data/docker
+ln -s /mnt/data/docker /var/lib/docker
+systemctl start docker
+```
 ## Docker compose install
 + mac，windows docker已经默认安装 `docker-compose --version`,linux需要安装
 ### 官网安装方式

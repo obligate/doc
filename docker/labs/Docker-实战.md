@@ -78,7 +78,7 @@ docker container ls -a |awk '{print $1}'
 docker rm  $(docker container ls -aq)  					 批量删除所有的容器
 docker rm  $(docker container ls -f "status=exited" -q)  批量删除所有退出的容器
 ```
-### 4.创建容器`docker container commit`，不推荐，只做了解即可
+### 4.通过容器创建image`docker container commit`，不推荐，只做了解即可
 + `docker container commit`构建，不推荐
 ```
 docker container commit   可以简写为docker commit         把container重新变成一个image
@@ -106,6 +106,8 @@ docker build -t peterhly/centos-vim-new .
 ### 5. flask-hello-world
 将fdockerlask-hello-world打包到容器，进行访问
 ```
+1. 可以手动的方式执行安装python，然后运行 python app.py,访问结果，如果访问不了，需要配置一下防火墙的策略
+2. 通过Dockerfile 构建image，运行container进行访问
 docker\labs\02-docker\flask-hello-world
 docker build -t peterhly/flask-hello-world .
 如果报错，可以通过以下方式调试
@@ -114,8 +116,28 @@ docker run -it 报错临时生成的imageid /bin/bash   #通过报错临时生�
 docker run peterhly/flask-hello-world         ##启动container
 docker run -d peterhly/flask-hello-world      ##后台运行container，使用-d
 docker ps 
+docker inspect 容器id，获取一下ip地址为： 172.17.0.2
+在docker host机器通过，curl http://172.17.0.2:5000  就可以进行访问， 此时其他机器访问不了
 ```
-
+### 6. 容器build一个ubuntu的命令行工具：stress
++ 手工执行
+```
+docker run -it ubuntu                             # 运行并进入容器内部
+apt-get update && apt-get install -y stress       # 安装stress
+which stress
+stress --help
+stress --vm 2 --verbose                      ## 启动2个worker，默认一个worker内存是256M
+stress --vm 1 --vm-bytes 500000M --verbose   ## 启动一个worker，自动启动的内存500000M,测试失败，受限于容器本身或者docker host
+另一个docker host shell查看top 查看当前docker host的内存总量
+```
++ Dockerfile执行
+```
+docker\labs\02-docker\ubuntu-stress
+docker build -t peterhly/ubuntu-stree . 
+docker image ls
+docker run -it  peterhly/ubuntu-stree                     ## 类似于执行了stress命令的help信息
+docker run -it  peterhly/ubuntu-stree --vm 1  --verbose   ## 类似于执行了stress命令的传入参数--vm 1 --verbose
+```
 
 ## Refer
 + [Docker Hub](https://docs.docker.com)

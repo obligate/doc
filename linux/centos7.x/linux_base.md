@@ -22,7 +22,7 @@ systemctl enable iptables.service #设置防火墙开机启动
 
 ## fdisk & mount
 ```
-fdisk -l                                                                           # 查看新加入的硬
+fdisk -l                                                                           # 查看新加入的硬盘
 fidsk /dev/xvdb -> m 获取帮助 -> n 添加分区 -> p 主分区 -> w 写分区
 yum -y install e4fsprogs
 mkfs -t ext4 /dev/xvdb1
