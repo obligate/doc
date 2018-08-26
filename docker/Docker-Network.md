@@ -153,7 +153,7 @@ sudo docker run -d -p 5000:5000 --link redis --name flask-redis -e REDIS_HOST=re
 + [vxlan](https://www.evoila.de/de/blog/2015/11/06/what-is-vxlan-and-how-it-works/)
 ![underlay 和overlay](img/underlay&overlay.png)
 + 多机器通信
-![多节点访问](Docker/python-flask-redis-app_multi_host.png)
+![多节点访问](img/python-flask-redis-app_multi_host.png)
 需要一个分布式存储[etcd](https://coreos.com/etcd/),解决ip地址的分配问题
 #### 1. setup etcd  cluster
 在docker-node1上
