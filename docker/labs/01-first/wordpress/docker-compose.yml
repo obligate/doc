@@ -25,3 +25,8 @@ services:
        WORDPRESS_DB_PASSWORD: wordpress
 volumes:
     db_data:
+    
+
+# 可以使用以下的命令实现上面的yml
+# docker run -d --name db -v db_data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=somewordpress -e MYSQL_DATABASE=wordpress -e MYSQL_USER=wordpress -e MYSQL_PASSWORD=wordpress mysql:5.7
+# docker run -d --name wordpress -e WORDPRESS_DB_HOST=db:3306 -e WORDPRESS_DB_USER=wordpress -e WORDPRESS_DB_PASSWORD=wordpress --link db -p 8000:80 wordpress

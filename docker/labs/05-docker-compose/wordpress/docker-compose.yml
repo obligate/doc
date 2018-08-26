@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+
+  wordpress:
+    image: wordpress
+    ports:
+      - 8080:80
+    depends_on:
+      - mysql
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_PASSWORD: root
+    networks:
+      - my-bridge
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - my-bridge
+
+volumes:
+  mysql-data:
+
+networks:
+  my-bridge:
+    driver: bridge
+
+
+# 2 Dockerfile部署wordpress
+# docker-compose的基本使用
+# ```
+# labs\05-docker-compose\wordpress\
+# docker-compose up                           ## Create and start containers
+# docker-compose up -d                        ## 后台运行
+# docker-compose -f docker-compose.yml        ## Create and start containers
+# docker-compose ps                           ## 查看serive
+# docker-compose images 
+# docker-compose exec mysql bash              ## 进入mysql的bash,mysql是在yml文件中定义的
+# docker-compose stop                         ## stop
+# docker-compose start                        ## start
+# docker-compose down      	                ## stop and remove
+# docker-compose network ls
+# ```

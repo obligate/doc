@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+
+  redis:
+    image: redis
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:5000
+    environment:
+      REDIS_HOST: redis
+
+
+
+# docker-compose up -d           建议-d的方式后台运行
+# docker-compose down   
+# docker-compose up --scale  web=3 -d    此时scale会报错,因为端口问题，把yml中的端口映射去掉 ports:- 8080:80
+# docker-compose down
+# docker-compose up --scale  web=3 -d   去掉端口，启动就不会报错，这种不好，可以考虑使用loadbalance

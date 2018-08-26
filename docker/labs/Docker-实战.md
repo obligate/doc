@@ -172,8 +172,61 @@ sudo docker rm flask-redis
 sudo docker run -d -p 5000:5000 --link redis --name flask-redis -e REDIS_HOST=redis  peterhly/flask-redis
 此时本地就可以访问 curl http://127.0.0.1:5000
 ```
-
-
+## 实战4-Docker Compose
+### 1  命令行部署wordpress
+```
+# 创建一个mysql container
+docker run -d --name mysql -v mysql-data:/var/lib/mysql -e  MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=wordpress  mysql   
+docker ps 
+# 创建一个 wordpress container 
+docker run -d -e WORDPRESS_DB_HOST=mysql:3306 --link mysql -p 8080:80 wordpress
+docker ps
+本地浏览器 http://127.0.0.1:8080 配置wordpress
+```
+### 2 docker-compose.yml部署wordpress
+docker-compose的基本使用
+```
+labs\05-docker-compose\wordpress\
+docker-compose up                           ## Create and start containers
+docker-compose up -d                        ## 后台运行
+docker-compose -f docker-compose.yml        ## Create and start containers
+docker-compose ps                           ## 查看serive
+docker-compose images 
+docker-compose exec mysql bash              ## 进入mysql的bash,mysql是在yml文件中定义的
+docker-compose stop                         ## stop
+docker-compose start                        ## start
+docker-compose down      	                ## stop and remove
+docker-compose network ls
+```
+### 3 docker-compose.yml部署flask-redis
+```
+labs\05-docker-compose\flask-redis\
+docker-compose up -d  默认开启
+docker-compose down   
+docker-compose up --scale  web=3 -d    此时scale会报错,因为端口问题，把yml中的端口映射去掉 ports:- 8080:80
+docker-compose down
+docker-compose up --scale  web=3 -d    去掉端口，启动就不会报错，这种不好，可以考虑使用loadbalance
+```
+### 4 scale采用haproxy 
+```
+labs\05-docker-compose\lb-sacle\
+docker-compose up -d 
+docker-compose ps 
+curl 127.0.0.1:8080
+docker-compose up --scale web=5 -d  扩展
+docker-compose ps
+curl 127.0.0.1:8080  多次访问的时候发现hostname不一样
+curl 127.0.0.1:8080  
+for i in `seq 10`;do curl 127.0.0.1:8080; done 
+docker-compose up --scale web=3 -d 减少  
+```
+### 5 投票系统实战
+```
+docker-compose build
+docker-compose up 
+http://docker host ip:5000    # 投票
+http://docker host ip:5001    # 显示结果
+```
 ## Refer
 + [Docker Hub](https://docs.docker.com)
 + [163 Hub](https://c.163yun.com/hub#/m/home/)
