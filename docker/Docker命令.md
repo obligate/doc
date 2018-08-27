@@ -106,4 +106,30 @@ docker-compose [选项] [子命令]
 | restart | 重启服务(up命令创建的所有容器) 相当于 `docker restart`       |
 | kill    | 像服务发送信号(up命令创建的所有容器) 相当于 `docker kill`    |
 
-
+## Docker Swarm
+```
+###############  manager ##############################
+docker swarm init --advertise-addr=192.168.205.10   # 初始化swarm，并宣告自己的ip地址
+docker swarm join-token -q worker                   # get manager join token
+docker swarm join-token manager                     # add a manager to this swarm
+docker node ls
+docker service create --name demo busybox /bin/sh -c  "while true; do sleep 3600; done"
+docker service ls 
+docker service ps demo 
+docker service scale demo=5 水平扩展service
+docker service rm demo 
+docker network create -d overlay demo
+docker network ls
+docker stack deploy wordpress --compose-file=docker-compose.yml    ## 创建一个stack
+docker stack ls
+docker stack ps wordpress          								   # 查看当前stack里面包含的container
+docker stack services wordpress                                    # 查看当前stack里面包含的service
+docker stack rm wordpress                                          # 删除当前的stack
+docker secret create my-pw password    # 通过文件方式生成一个secret
+docker secret ls                       # 查看当前docker中存在的secret
+echo "adminadmin" | docker secret create my-pw-2 -     # 通过控制台方式生成secret 
+docker secret rm my-pw-2
+docker service create --name client --secret my-pw busybox /bin/sh -c  "while true; do sleep 3600; done" #使用
+##################### worker ##################################
+docker swarm join --token xxxx  192.168.205.10:2377 # 加入到manage节点
+```

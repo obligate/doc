@@ -30,3 +30,17 @@ mount /dev/xvdb1 /mnt
 vim /etc/fstab   
 /dev/xvdb1  /mnt      ext4    defaults        0 0
 ```
+
+## 常用配置
+### hostname
+```
+# 一旦修改了静态主机名，/etc/hostname 将被自动更新。然而，/etc/hosts 不会更新以保存所做的修改，所以你每次在修改主机名后一定要手动更新/etc/hosts，之后再重启CentOS 7。否则系统再启动时会很慢
+hostnamectl set-hostname node_master                       # 修改hostname
+```
+### 安装EPEL
+```
+rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum -y install epel-release
+yum clean all && yum makecache         # 清除系统所有的yum缓存 和 生成yum缓存
+yum repolist
+```

@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+
+  web:
+    image: wordpress
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_PASSWORD: root
+    networks:
+      - my-network                        #
+    depends_on:
+      - mysql
+    deploy:                               #
+      mode: replicated
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - my-network                        #
+    deploy:                               #  
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  mysql-data:
+
+networks:
+  my-network:
+    driver: overlay                      # 
+
+
+
+
+# cd labs\06-docker-swarm\wordpress\
+# more docker-compose.yml
+# docker stack deploy wordpress --compose-file=docker-compose.yml    ## 创建一个stack
+# docker stack ls
+# docker stack ps wordpress                                          # 查看当前stack里面包含的container
+# docker stack services wordpress                                    # 查看当前stack里面包含的service
+# docker stack rm wordpress                                          # 删除当前的stack
+# 验证：打开浏览器 http://192.168.205.10:8080

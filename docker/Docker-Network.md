@@ -58,7 +58,7 @@ sudo docker network inspect 网络id		## 查看网络id的详细情况
 ip a会出现docker0（本机）和veth的端口（连接的端口），这样就可以把这个端口和docker容器内的端口链接起来，是一对veth pair
 sudo docker exec test1 ip a
 怎么确定本地的docker0和veth pair其中一个端口是连接的呢，使用brctl
-sudo yum install bridge-uitls 先安装一下
+sudo yum install bridge-utils 先安装一下
 brctl show 
 ```
 ### link 是单向的，用的不多

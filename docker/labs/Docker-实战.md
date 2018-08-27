@@ -227,6 +227,67 @@ docker-compose up
 http://docker host ip:5000    # 投票
 http://docker host ip:5001    # 显示结果
 ```
+## 实战5 - Docker Swarm
+### 5.1 手工部署wordpress
+```
+docker network create -d overlay demo      #此时在manager上有overlay，其他节点创建服务的时候就会把overlay同步过去
+docker network ls
+docker service create --name mysql --env MYSQL_ROOT_PASSWORD=root --env MYSQL_DATABASE=wordpress --network demo  --mount  type=volume,source=mysql-data,destination=/var/lib/mysql  mysql 
+docker service ls
+docker service ps mysql    看mysql容器在哪里，到对应的机器看一下docker ps 
+docker service create --name wordpress -p 80:80 --env WORDPRESS_DB_PASSWORD=root --env WORDPRESS_DB_HOST=mysql     --network demo wordpress
+docker service ps wordpress  查看对应的docker host，在浏览器通过ip访问，在swarm的机器的任意一个节点都可以访问wordpress
+```
+### 5.2 部署Wordpres
+[compose-file/#deploy](https://docs.docker.com/compose/compose-file/#deploy)
+```
+cd labs\06-docker-swarm\wordpress\
+more docker-compose.yml
+docker stack deploy wordpress --compose-file=docker-compose.yml    ## 创建一个名为wordpress的stack
+docker stack ls
+docker stack ps wordpress          # 查看当前stack里面包含的container
+docker stack services wordpress    # 查看当前stack里面包含的service
+docker stack rm wordpress          # 删除当前的stack
+验证：打开浏览器 http://192.168.0.11:8080
+```
+### 5.3 部署vote
++ stack 默认的network是overlay
++ 不能通过build方式构建，必须通过image，所以需要先生成image，此例子用的是hub上的example
+```
+cd labs\06-docker-swarm\example-vote-app
+docker stack deploy example --compose-file=docker-compose.yml    ## 创建一个名字为example的stack
+docker stack ls                    # 查看当前的service数量
+docker stack service example       # 查看具体service的的情况
+验证：
+http://192.168.0.11:5000            # 投票
+http://192.168.0.11:5001            # 应该打不开，使用的angular.js 需要翻墙才可以，或者自己build一个image
+http://192.168.0.11:8080            # swarm的可视化工具
+docker service scale example_vote=3   # 扩容到3
+docker stack services example         # 查看example stack的情况
+http://192.168.0.11:8080            # swarm的可视化工具，就会把example_vote变成3
+docker stack rm example
+```
+### 5.4 更新service
+```
+docker\labs\06-docker-swarm\python-flask-demo
+先确保有一个overylay的网络，没有可以创建一个
+docker network ls 
+docker network create -d overlay demo
+docker service create --name web --publish 8080:5000 --network demo peterhly/python-flask-demo:1.0
+docker service ps web   ## 查询web service所在的机器
+docker service scale web=2   # 更新之前先把service为web的横向扩展为2，防止更新过程中，访问不中断
+docker service ps web
+curl 127.0.0.1:8080     返回正常
+验证更新过程中是否中断，我们需要做一个测试，首先登陆到一个work上，例如 vagrant ssh swarm-work1
+curl 127.0.0.1:8080     返回正常
+sh -c "while true; do curl  127.0.0.1:8080&& echo "\n"&& sleep 1 ; done "   # 每隔1秒访问一次
+在我们的manager的服务器进行 service 更新
+docker service update --image peterhly/python-flask-demo:2.0 web          ## 更新image到2.0版本
+docker service ps web     发现1.0版本的在shutdown
+docker service update --publish-rm 8080:5000 --publish-add 8088:5000 web   ##更新端口,会中断一会
+## docker stack 更新,还是通过docker stack deploy的方式来进行service的更新操作
+docker stack deploy web -c=docker-compose.yml
+```
 ## Refer
 + [Docker Hub](https://docs.docker.com)
 + [163 Hub](https://c.163yun.com/hub#/m/home/)

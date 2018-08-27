@@ -31,6 +31,10 @@ docker-machine create swarm-worker1
 ```
 ### service的创建维护和水平扩展
 ```
+使用：
+1. docker service scale 可以通过scale进行横向扩展
+2. 当scale发现其中service shutdown，会自动监控重启
+########## 命令演示############## 
 vagrant ssh swarm-manager
 docker service create --name demo busybox /bin/sh -c  "while true; do sleep 3600; done"
 docker service ls 
@@ -41,7 +45,7 @@ docker service ls
 docker service ps demo
 vagrant ssh  swarm-worker1 或者swarm-worker2 本地查看docker ps 一下，此时我们删除一个docker rm -f 容器id，
 回到manager上发现scale又重新起了一个container，通过 docker service ls 查看一下
-docker service rm demo
+docker service rm demo       
 docker service ps demo 
 ```
 ###在swarm集群中通过service部署wordpress
@@ -57,6 +61,13 @@ docker service ps network
 ```
 #### 集群服务间通信之Routing Mesh
 ```
+结论：
+1. swarm会给每一个service分配一个虚拟的ip，因为service我们会进行scale
+2. 到service对应的容器内部
+	1. 通过nslookup 服务名称，获取这个虚拟ip
+	2. 通过nslookup tasks.服务名称，可以获取虚拟ip和对应的容器的真实ip,vip和真实ip有一个map关系
+3. container之间是通过overlay去通讯的，service是通过vip去实现的
+############### 命令演示#################
 首先确保有一个overlay的network，如果没有可以使用命令创建一个
 docker network create -d overlay demo
 docker service create --name whoami -p 8000:8000 --network demo -d jwilder/whoami
@@ -91,33 +102,34 @@ more index.html
 ![swarm服务之间的网络，通过vip，容器是vxlan](img/swarm-mode-internal-load-balancing.png)
 ![容器内部的网络情况](img/swarm-mode-container-dns-lvs.png)
 Routing Mesh 的两种体现
-+ Internal --- Container 和 Container 之间的访问通过overlay网络（通过VIP虚拟ip）
++ Internal --- Container 和 Container 之间的访问通过overlay网络（通过VIP虚拟ip），容器是链接到同一个overylay网络
 + Ingress  --- 如果服务有绑定端口，则此服务可以通过任意swarm节点的相应接口访问
 ![Ingress](img/swarm-mode-ingress-network.png)
 ![Ingress数据包走向](img/swarm-mode-ingress-network-packet.png)
 ```
 在没有whoami服务的节点访问，假如work1没有
 curl 127.0.0.1:8000 发现有数据返回，就是Ingress network起的作用
-sudo iptables -nL -t nat    # 查看本地的转发规则
+sudo iptables -nL -t nat                     # 查看本地的转发规则
 brctl show
-docker network inspect xxxx(bridge名称），转发到ingress-sbox上了
+docker network inspect docker_gwbridge(bridge名称），转发到ingress_sbox上了
 sudo ls /var/run/docker/netns     查看本地的namespace
-sudo nsenter --net=/var/run/docker/netns/ingress-sbox   进入ingress-sbox这个namespace
+sudo nsenter --net=/var/run/docker/netns/ingress_sbox   进入ingress_sbox这个namespace
 ip a 已经进入到了ingress-box，发现ip就是我们要转发的IP
-iptables -nL -t mangle 
+iptables -nL -t mangle 									 # 转发规则做一个mark，主要是做负载均衡用的
 exit   退出ingress-box networknamespace,返回work1主机
 sudo yum install ipvsadm   lvs的管理工具
-sudo nsenter --net=/var/run/docker/netns/ingress-sbox   再进入ingress-sbox这个namespace
+sudo nsenter --net=/var/run/docker/netns/ingress_sbox   再进入ingress_sbox这个namespace
 iptables -nL -t mangle
 ipvsadm -l       可以看到whoami 这两个service的地址【docker exec 服务id ip a】确认一下ip
 ```
 
 #### Docker Stack 仅限于swarm,类似于单机版本的docker compose
+[compose-file/#deploy](https://docs.docker.com/compose/compose-file/#deploy)
 + 实战1部署Wordpres
 ```
-cd chapter7/labs/wordpress/
+cd labs\06-docker-swarm\wordpress\
 more docker-compose.yml
-docker stack deploy wordpress --compose-file=docker-compose.yml    ## 创建一个stack
+docker stack deploy wordpress --compose-file=docker-compose.yml    ## 创建一个名为wordpress的stack
 docker stack ls
 docker stack ps wordpress          # 查看当前stack里面包含的container
 docker stack services wordpress    # 查看当前stack里面包含的service
@@ -128,17 +140,17 @@ docker stack rm wordpress          # 删除当前的stack
 	+ stack 默认的network是overlay
 	+ 不能通过build方式构建，必须通过image，所以需要先生成image，此例子用的是hub上的example
 ```
-cd chapter7/labs/example-vote-app
+cd labs\06-docker-swarm\example-vote-app
 docker stack deploy example --compose-file=docker-compose.yml    ## 创建一个名字为example的stack
 docker stack ls                    # 查看当前的service数量
 docker stack service example       # 查看具体service的的情况
 验证：
-http://192.168.205.10:5000            # 投票
-http://192.168.205.10:5001            # 应该打不开，使用的angular.js 需要翻墙才可以，或者自己build一个image
-http://192.168.205.10:8080            # swarm的可视化工具
+http://192.168.0.11:5000            # 投票
+http://192.168.0.11:5001            # 应该打不开，使用的angular.js 需要翻墙才可以，或者自己build一个image
+http://192.168.0.11:8080            # swarm的可视化工具
 docker service scale example_vote=3   # 扩容到3
 docker stack services example         # 查看example stack的情况
-http://192.168.205.10:8080            # swarm的可视化工具，就会把example_vote变成3
+http://192.168.0.11:8080            # swarm的可视化工具，就会把example_vote变成3
 docker stack rm example
 ```
 #### Docker Secret管理和使用
@@ -197,6 +209,8 @@ docker stack services wordpress
 ```
 #### Service 的更新
 ```
+docker\labs\06-docker-swarm\python-flask-demo
+先确保有一个overylay的网络，没有可以创建一个
 docker network ls 
 docker network create -d overlay demo
 docker service create --name web --publish 8080:5000 --network demo peterhly/python-flask-demo:1.0
@@ -206,12 +220,12 @@ docker service ps web
 curl 127.0.0.1:8080     返回正常
 验证更新过程中是否中断，我们需要做一个测试，首先登陆到一个work上，例如 vagrant ssh swarm-work1
 curl 127.0.0.1:8080     返回正常
-sh -c "while true; do curl  127.0.0.1:8080&&sleep 1 ; done "   # 每隔1秒访问一次
+sh -c "while true; do curl  127.0.0.1:8080&& echo "\n"&& sleep 1 ; done "   # 每隔1秒访问一次
 在我们的manager的服务器进行 service 更新
 docker service update --image peterhly/python-flask-demo:2.0 web          ## 更新image到2.0版本
 docker service ps web     发现1.0版本的在shutdown
-docker service update --publish-rm 8080:5000 --publish-add 8088:5000 web   ##更新端口
-## docker stack 更新,还是通过docker stack deploy
+docker service update --publish-rm 8080:5000 --publish-add 8088:5000 web   ##更新端口,会中断一会
+## docker stack 更新,还是通过docker stack deploy的方式来进行service的更新操作
 docker stack deploy web -c=docker-compose.yml
 ```
 ## docker cloud cass-container-as-a-service
