@@ -2,6 +2,7 @@
 ### 防火墙
 + 关闭firewall
 ```
+firewall-cmd --state             # 查看状态
 systemctl stop firewalld.service #停止firewall
 systemctl disable firewalld.service #禁止firewall开机启动
 ```
