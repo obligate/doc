@@ -74,7 +74,7 @@ minikube dashboard    # 打开Kubernetes控制台
 # install some tools
 sudo yum install -y vim telnet bind-utils wget
 # install kops
-wget https://github.com/kubernetes/kops/releases/download/1.8.1/kops-linux-amd64
+wget https://github.com/kubernetes/kops/releases/download/1.10.0/kops-linux-amd64
 mv kops-linux-amd64 kops
 sudo mv kops /usr/local/bin/
 sudo chmod +x /usr/local/bin/kops
@@ -110,15 +110,24 @@ sudo pip install awscli
 ```
 ### 创建
 ```
-1. 创建一个ssh key: tlz_cluster
+1. 创建一个ssh key: tlz_cluster 
 2. 创建一个集群的配置，保存到s3
-kops create cluster --name=k8s.360pf.net --ssh-public-key ~/.ssh/tlz_cluster.pub --state=s3://kops.k8s.360pf.net --zones=us-west-1a  --node-count=2 --node-size=t2.medium --master-size=t2.medium --dns-zone=k8s.360pf.net 
+kops create cluster --name=k8s.360pf.net --ssh-public-key=~/.ssh/tlz_cluster.pub --state=s3://kops.k8s.360pf.net --zones=us-west-1a  --node-count=2 --node-size=t2.medium --master-size=t2.medium --dns-zone=k8s.360pf.net
+kops create cluster --name=k8s.360pf.net  --state=s3://kops.k8s.360pf.net --zones=us-west-1a  --node-count=2 --node-size=t2.medium --master-size=t2.medium --dns-zone=k8s.360pf.net
 ### 如果配置信息有问题，可以先删除，然后创建
-kops delete cluster --name=k8s.360pf.net  --state=s3://kops.k8s.360pf.net --yes 删除配置信息
+kops delete cluster --name=k8s.360pf.net  --state=s3://kops.k8s.360pf.net          -- 确认删除配置信息
+kops delete cluster --name=k8s.360pf.net  --state=s3://kops.k8s.360pf.net --yes    -- 删除集群
 ### 真正的创建虚机
 kops update cluster k8s.360pf.net --yes   --state=s3://kops.k8s.360pf.net  
-kops validate cluster --state=s3://kops.k8s.360pf.net    验证cluster的状态
-kubectl get nodes 
-kops delete cluster --name=k8s.360pf.net --state=s3://kops.k8s.360pf.net
-kops delete cluster --name=k8s.360pf.net --state=s3://kops.k8s.360pf.net --yes
+## 验证状态
+ssh -i ~/.ssh/id_rsa admin@api.k8s.360pf.net                                  # ssh to the master
+kubectl get nodes --show-labels                                               # list nodes
+kops validate cluster --state=s3://kops.k8s.360pf.net                         # 验证cluster的状态
+```
+```
+systemctl status etcd kube-apiserver kube-controller-manager kube-scheduler | grep "(running)" | wc -l
+sudo systemctl stop firewalld
+sudo systemctl disable firewalld
+sudo firewall-cmd --state
+sudo systemctl status firewalld
 ```

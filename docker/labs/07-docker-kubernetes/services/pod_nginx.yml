@@ -11,3 +11,18 @@ spec:
     ports:
     - name: nginx-port
       containerPort: 80
+
+
+
+
+# kubectl create -f pod_nginx.yml
+# kubectl get pods -o wide ,  例如pod的内部ip为： 100.96.1.3
+# ssh -i ~/.ssh/id_rsa admin@api.k8s.360pf.net     master的一个dns地址api.k8s.360pf.net
+# ping 100.96.1.3   可以ping通
+# curl 100.96.1.3   访问到了nginx配置
+# exit
+# kubectl get pods
+# kubectl expose pod nginx-pod --type=NodePort   创建一个NodePort类型的service
+# kubectl get svc    映射到了31235端口
+# curl api.k8s.360pf.net:31235   访问master节点，没有返回，需要在aws的防火墙设置一下这个端口才可以访问
+# http://api.k8s.360pf.net:31235

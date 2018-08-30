@@ -67,7 +67,7 @@ kubectl port-forward nginx 8080:80     # 做一个端口映射，把容器的80�
 [ReplicaSet](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
 ```
 kubectl delete -f pod_nginx.yml            # 删除pod
-cd chapter9\labs\replicas-set
+cd labs\07-docker-kubernetes\replicas-set
 kubectl create -f rs_nginx.yml             # 此时会报错，在v1版本不支持ReplicaSet，可以使用ReplicationController
 kubectl create -f rc_nginx.yml               
 kubectl get rc                             # 查询rc
@@ -95,7 +95,7 @@ kubectl get rs
 ##### Deployment
 [deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 ```
-cd chapter9\labs\deployment
+cd labs\07-docker-kubernetes\deployment
 kubectl create -f deployment_nginx.yml
 kubectl get deployment 
 kubectl get rs 
@@ -122,7 +122,7 @@ curl http://minicubehostip:刚才暴露的端口
 [config合并参考](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/)
 
 ```
-cd chapter9\tectonic-sandbox-1.7.5-tectonic.1
+cd 07-docker-kubernetes\tectonic-sandbox-1.7.5-tectonic.1
 vagrant up
 这样本地有两个cluster，一个minicube，一个tectonic，需要将两个配置文件合并,文件路径 ~/.kube/config
 参考https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
@@ -138,7 +138,7 @@ docker ps
 ##### k8s基础网络Cluster Network
 ```
 vargrant status
-cd chapter9\labs\services
+cd docker\labs\07-docker-kubernetes\services
 kubectl create -f  pod_busybox.yml
 kubectl create -f  pod_nginx.yml
 kubectl get pods
@@ -171,7 +171,7 @@ ping 10.2.0.51
 ##### clusterIP,cluster内部可以访问，外部访问不了
 [rolling-update](https://kubernetes.io/docs/tasks/run-application/rolling-update-replication-controller/)
 ``` 还是基于coreos  Tectonic的实验环境
-cd chapter9\labs\services
+cd docker\labs\07-docker-kubernetes\services
 kubectl create -f  pod_busybox.yml
 kubectl create -f  pod_nginx.yml
 kubectl get pods -o wide
@@ -203,7 +203,7 @@ kubectl get pods
 + nodeport 暴露的端口在cluster中的所有的node上，端口的浪费
 + 实际环境用的少
 ```
-cd chapter9\labs\services
+cd docker\labs\07-docker-kubernetes\services
 kubectl create -f  pod_nginx.yml
 kubectl get pods 
 kubectl expose pods nginx-pod --type=NodePort
@@ -222,7 +222,7 @@ kubectl get svc
 ```
 ##### Label使用
 ```
-cd chapter9\labs\services 
+cd docker\labs\07-docker-kubernetes\services 
 kubectl create -f  pod_busybox.yml
 kubectl get pods     #此时显示pending
 kubectl get node --show-lables    我们发现在node上没有一个hardware good的label存在，所以pod会一直pending
@@ -235,20 +235,20 @@ kubectl get pods    需要过一段时间看一下，此时不是pending了，�
 ##### kops install
 [k8s kops](https://github.com/kubernetes/kops)快速在cloud搭建k8s环境
 
-##### 使用kops在亚马逊AWS上搭建k8s集群
+##### 使用kops
 ```
-vi pod_nginx.yml  创建一个nginx的pod，参考chapter9\labs\services\pod_nginx.yml
+创建一个nginx的pod，参考docker\labs\07-docker-kubernetes\services\pod_nginx.yml
 kubectl create -f pod_nginx.yml
 kubectl get pods -o wide ,例如pod的ip为： 100.96.1.3
-ssh -i ~/.ssh/id_rsa admin@api.k8s.imooc.link     master的一个dns地址api.k8s.imooc.link
+ssh -i ~/.ssh/id_rsa admin@api.k8s.360pf.net     master的一个dns地址api.k8s.360pf.net
 ping 100.96.1.3   可以ping通
 curl 100.96.1.3   访问到了nginx配置
 exit
 kubectl get pods
 kubectl expose pod nginx-pod --type=NodePort   创建一个NodePort类型的service
 kubectl get svc    映射到了31235端口
-curl api.k8s.imooc.link:31235   访问master节点，没有返回，需要在aws的防火墙设置一下这个端口才可以访问
-http://api.k8s.imooc.link:31235
+curl api.k8s.360pf.net:31235   访问master节点，没有返回，需要在aws的防火墙设置一下这个端口才可以访问
+http://api.k8s.360pf.net:31235
 ```
 #####  LoadBlancer类型Service以及AWS的DNS服务配置
 ```
@@ -265,7 +265,7 @@ kubectl get svc
 
 ##### 实战： 在亚马逊k8s集群上部署wordpress
 ```
-cd chapter9\labs\wordpress
+cd docker\labs\07-docker-kubernetes\wordpress
 kubectl create secret generic mysql-pass --from-literal=password=imooc  创建一个secret
 kubectl get secret 
 kubectl create -f  mysql-deployment.yaml
@@ -279,131 +279,4 @@ kubectl get pods
 aws中的ec2的dashboard中可以查看loadbalance，通过dns在浏览器直接可以访问
 kubectl exec -it 容器id bash ，进入到容器里面测试一下wordpress链接db
 ping mysql-service   可以通过service互相访问
-```
-## 容器的运维和监控
-### 容器的基本监控
-```
-cd chapter10\
-vagrant up
-vagrant status
-vagrant ssh docker-host-10
-docker ps -a
-docker top  容器id
-docker stats   输入q退出
-```
-+ weavescope 监控，可视化和管理Docker，K8s
-```
-sudo curl -L git.io/scope -o /usr/local/bin/scope
-sudo chmod +x /usr/local/bin/scope
-scope launch 192.168.210.10  
-会提供一个访问界面的url，例如：http://192.168.210.10:4040/
-```
-+ weavescope 监控多台主机
-```
-在多台主机分别执行下面的命令即可
-scope launch 192.168.210.10  192.168.210.11
-```
-+ wordpress实战
-```
-cd cd chapter10\labs\wordpress
-curl -L https://github.com/docker/compose/releases
-sudo chmod +x /usr/local/bin/docker-compose
-docker-compose  up
-```
-### k8s集群运行资源监控——Heapster+Grafana+InfluxDB
-#### Heapster
-[Heapster](https://github.com/kubernetes/heapster) Compute Resource Usage Analysis and Monitoring of Container Clusters
-[Cluster add-on](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons)
-```
-1.首先要准备一个k8s的集群
-2.安装Heapster
-minikube ssh
-docker pull k8s.gcr.io/heapster-grafana-amd64:v4.4.3
-docker pull k8s.gcr.io/heapster-amd64:v1.4.2
-docker pull k8s.gcr.io/heapster-influxdb-amd64:v1.3.3
-exit
-cd chapter10\labs\heapster-master\deploy\kube-config\influxdb\
-kubectl create -f influxdb.yaml
-kubectl create -f heapster.yaml
-kubectl create -f grafana.yaml
-source <(kubectl completion zsh)
-kubectl get deployment  发现没有，是因为在不同的namespace
-kubectl get svc
-kubectl get namespace
-kubectl get svc  --namespace kube-system    在kube-system中查找service
-发现有个kubernetes的dashboard
-http://【minicube的主机ip】:30000   访问dashboard
-http://【minicube的主机ip】:30619   访问 grafana  需要登陆，默认的用户名和密码是 admin/admin
-kubectl get pods
-kubectl expose pods nginx-pod --type=NodePort
-kubectl get svc   看一下nginx 的端口32260
-wrk -t12 -c400 -d30s  http://【minicube的主机ip】:32260      访问nginx做一个测试
-```
-#### 根据资源占用自动横向伸缩
-通过上节的性能监控，我们可以进行资源的占用自动横向伸缩
-[horizontal-pod-autoscale](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
-![k8s_autoscaler](Docker/k8s_autoscaler.png)
-```
-cd chapter10\labs\heapster-master\deploy\kube-config\influxdb\
-kubectl delete 
-minikube addons list 
-minikube addons enable heapster   开启heapster
-minikube start --extra-config=controller-manager.HorizontalPodAutoscalerUseRESTClients=false
-开始实验(https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/)
-只要资源占用在50%的情况，就会扩展，最大扩展到10个
-### 创建一个pod
-kubectl run php-apache --image=k8s.gcr.io/hpa-example --requests=cpu=200m --expose --port=80
-### 创建autoscale
-kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10 
-kubectl get deployment php-apache
-kubectl get horizontalpodautoscaler
-kubectl get svc    此时php-apache的ip为： 10.105.138.235
-minikube ssh 进入到minikube
-wget php-apache的服务ip[10.105.138.235]:80 
-rm -rf index.html
-重新开启一个shell，写一个循环
-while true; do wget -q -O- http://10.105.138.235;done
-返回在minicube 主机。
-kubectl get horizontalpodautoscaler   查看资源的情况
-kubectl get deployment php-apache     此时已经扩展
-把开启的shell的循环结束，看看是否scale降低
-```
-#### k8s集群Log的采集和展示——ELK+Fluentd
-##### 容器时代的log
-+ logging是我们了解应用运行状态非常重要的手段，它可以显示error，info甚至debug信息
-+ 容器时代，我们怎么看log？ docker logs,kubectl logs
-##### solution
-+ 30多年历史的Syslog
-+ 新时代的log技术
-	+ ELK Stack(ElasticSearch + LogStash + Kibana)  需要再学习学习？？？
-	+ Hosted log 服务
-+ 工具介绍
-	+ Fluentd（log转发）
-	+ ElasticSearch(log Index)
-	+ Kibana (log可视化）
-	+ LogTrail（log UI查看）
-![k8s_log_monitor](Docker/k8s_log_monitor.png)
-```
-1. 先准备一个实验环境，在aws使用kops开了一个3个node的cluster
-2. 或者使用[k8s kubeadm](https://github.com/kubernetes/kubeadm)在本地快速搭建k8s多节点环境
-cd chapter10\labs\logging\
-kubectl get node
-kubectl lable node --all beta.kubernetes.io/fluentd-ds-ready=true 给所有的节点打一个标签，为了fluentd的安装和收集log
-cd ..
-kubectl create -f logging/   会把logging中的yml定义的资源文件都会创建
-kubectl get svc --namespace=kube-system     获取kube-system namespace中的service
-通过loadbalance地址和端口进行浏览器访问
-```
-#### k8s集群监控方案Prometheus
-[Prometheus](https://prometheus.io/)
-```
-1. 先准备一个实验环境，在aws使用kops开了一个3个node的cluster
-kubectl get node 
-cd chapter10\labs\prometheus\
-通过loadbalance的url和端口访问
-kubectl get svc 
-kubectl get pod -o wide 
-kubectl get nod -o wide
-ssh admin@awsmasterip的节点
-curl http://pod的ip/metrics    可以根据情况自己采集数据
 ```
