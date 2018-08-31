@@ -209,7 +209,7 @@ docker-compose up --scale  web=3 -d    去掉端口，启动就不会报错，�
 ```
 ### 4.4 scale采用haproxy 
 ```
-labs\05-docker-compose\lb-sacle\
+labs\05-docker-compose\lb-scale\
 docker-compose up -d 
 docker-compose ps 
 curl 127.0.0.1:8080

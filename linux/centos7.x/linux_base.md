@@ -45,3 +45,20 @@ yum -y install epel-release
 yum clean all && yum makecache         # 清除系统所有的yum缓存 和 生成yum缓存
 yum repolist
 ```
+
+## 常用命令
+### 端口占用情况
+#### lsof -i:端口号
+```
+yum install lsof -y
+lsof -i:端口号 用于查看某一端口的占用情况，比如查看8000端口使用情况，lsof -i:8000
+```
+#### netstat -tunlp |grep 端口号
+```
+netstat -tunlp |grep 端口号，用于查看指定的端口号的进程情况，如查看8000端口的情况，netstat -tunlp |grep 8000
+-t (tcp) 仅显示tcp相关选项
+-u (udp)仅显示udp相关选项
+-n 拒绝显示别名，能显示数字的全部转化为数字
+-l 仅列出在Listen(监听)的服务状态
+-p 显示建立相关链接的程序名
+```

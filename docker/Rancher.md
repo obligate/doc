@@ -5,6 +5,7 @@
 ### 1.[Rancher Server install](https://rancher.com/quick-start/)
 + 1.centos7.3以上，先安装docker
 + 2.安装`sudo docker run -d --restart=unless-stopped -p 8080:8080   rancher/server:stable`
++ `docker stop <container_name_of_original_server>`
 
 ### 2.配置agent和agent的安装
 通过浏览器访问 http://192.168.0.11:8080
