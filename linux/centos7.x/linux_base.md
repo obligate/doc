@@ -18,6 +18,9 @@ systemctl list-unit-files|grep disabled
 systemctl list-unit-files|grep disabled | grep httpd
 ```
 - 11、使指定服务从新加载配置：`systemctl reload httpd`
+- 12、查看服务是否开机启动：`systemctl is-enabled firewalld.service`
+- 13、查看已启动的服务列表：`systemctl list-unit-files|grep enabled`
+- 14、查看启动失败的服务列表：`systemctl --failed`
 ### 关机重启
 ```
 init 0                  # 关机
@@ -244,7 +247,16 @@ systemctl enable firewalld         # 开机启用
 ```
 #### 2.firewall-cmd的基本使用-开启端口
 ```
+firewall-cmd --version                                         # 查看版本
+firewall-cmd --help                                            # 查看帮助
 firewall-cmd --state                                           # 查看状态
+firewall-cmd --zone=public --list-ports                        # 查看所有打开的端口
+firewall-cmd --reload                                          # 更新防火墙规则
+firewall-cmd --get-active-zones                                # 查看区域信息
+firewall-cmd --get-zone-of-interface=eth0                      # 查看指定接口所属区域
+firewall-cmd --panic-on                                        # 拒绝所有包
+firewall-cmd --panic-off                                       # 取消拒绝状态
+firewall-cmd --query-panic                                     # 查看是否拒绝
 firewall-cmd --zone=public --add-port=80/tcp --permanent       # 开启端口:（–permanent永久生效，没有此参数重启后失效）  
 firewall-cmd --reload                                          # 重新载入: 修改firewall-cmd配置后必须重启
 firewall-cmd --zone= public --query-port=80/tcp                # 查看:  修改firewall-cmd配置后必须重启 
