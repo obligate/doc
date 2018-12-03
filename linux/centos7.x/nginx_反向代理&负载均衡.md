@@ -14,7 +14,7 @@
     sudo systemctl start nginx.service
     sudo systemctl enable nginx.service
 ```
-- 5. 访问`http://127.0.0.1`测试是否正常
+- 5、访问`http://127.0.0.1`测试是否正常
 
 ## 3. Nginx 反向代理配置
 ### 1、关闭Selinux
@@ -129,7 +129,7 @@ server {
 
 # 3. nginx实现负载均衡
 ![负载均衡](img/nginx_lb_1.png)
-在nginx的机器，config中配置多个机器机器列表，实现负载聚会，nginx会根据用户ip，转发到不同的node服务上
+在nginx的机器，config中配置多个机器机器列表，实现负载均衡，nginx会根据用户ip，转发到不同的node服务上
 ```
 upstream lbaa {
 	ip_hash;

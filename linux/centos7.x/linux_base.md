@@ -288,3 +288,8 @@ yum -y install epel-release
 yum clean all && yum makecache         # 清除系统所有的yum缓存 和 生成yum缓存
 yum repolist
 ```
+
+## 应用
+```
+find ./ -type f -mtime +7 -print -exec rm -f {} \;
+```
