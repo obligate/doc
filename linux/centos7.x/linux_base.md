@@ -236,6 +236,13 @@ ONBOOT=’no’修改为yes
 重启网络
 service network restart
 ```
+### 修改hostname
+```
+vim /etc/sysconfig/network
+vim /etc/hosts
+hostnamectl set-hostname cloud-02 
+reboot 或者exit重新登陆
+```
 ### 防火墙
 #### 1.firewalld的基本使用
 ```
