@@ -300,3 +300,25 @@ yum repolist
 ```
 find ./ -type f -mtime +7 -print -exec rm -f {} \;
 ```
+
+## too many open files
+`ulimit -a      # 可以查看`
+其中 open files (-n) 1024 表示每个用户最大允许打开的文件数量是1024
+![ulimit -a](img/ulimit.png)
+```
+lsof | wc -l                      # 查看当前系统打开的文件数量
+lsof -p pid | wc -l               # 查看某一进程的打开文件数量
+ulimit -n 2048                    # 设置open files数值方法，这种设置方法在重启后会还原为默认值
+```
++ 永久设置方法
+```
+vim /etc/security/limits.conf
+在最后加入
+* soft nofile 4096
+* hard nofile 4096
+```
+最前的 * 表示所有用户，可根据需要设置某一用户，例如
+```
+fdipzone soft nofile 8192
+fdipzone hard nofile 8192
+```
