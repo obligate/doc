@@ -1,6 +1,8 @@
 ## 概述
 Nginx是一款轻量级的Web服务器、反向代理服务器，由于它的内存占用少，启动极快，高并发能力强，在互联网项目中广泛应用
+
 ![nginx使用的场景](img/ngin_normal_usingx.png)
+
 上图基本上说明了当下流行的技术架构，其中Nginx有点入口网关的味道
 ## 反向代理服务器？
 经常听人说到一些术语，如反向代理，那么什么是反向代理，什么又是正向代理呢？
@@ -16,7 +18,9 @@ Nginx是一款轻量级的Web服务器、反向代理服务器，由于它的内
 ## Nginx的Master-Worker模式
 
 ![nginx查看](img/ngnix_ps.png)
+
 启动Nginx后，其实就是在80端口启动了Socket服务进行监听，如图所示，Nginx涉及Master进程和Worker进程
+
 ![master-worker](img/nginx_master_work_model.png)
 
 ### Master进程的作用是?
@@ -38,6 +42,7 @@ Keepalived是一个高可用解决方案，主要是用来防止服务器单点�
 
 ## 虚拟主机
 ![虚拟主机](img/config_server.png)
+
 其实这是把Nginx作为web server来处理静态资源
 + location可以进行正则匹配，应该注意正则的几种形式以及优先级
 + Nginx能够提高速度的其中一个特性就是：动静分离，就是把静态资源放到Nginx上，由Nginx管理，动态请求转发给后端
