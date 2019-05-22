@@ -41,7 +41,7 @@ http
 + http块
   + server块
     + location块
- > 一个http块可以保护多个server块，一个server块可以保护多个location块 
+ > 一个http块可以包含多个server块，一个server块可以包含多个location块 
 ### 全局块
 配置影响nginx全局的指令。一般有运行nginx服务器的用户组，nginx进程pid存放路径，日志存放路径，配置文件引入，允许生成worker process数等
 ```
