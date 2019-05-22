@@ -23,8 +23,7 @@ http {
     server_tokens off;   #关闭显示nginx版本
 
     server_names_hash_bucket_size 64;
-    # server_name_in_redirect off;
-
+    
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
 
@@ -32,15 +31,12 @@ http {
     # SSL Settings
     ##
 
-    #ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
     ssl_protocols TLSv1.2;
     ssl_prefer_server_ciphers on;
-   # ssl_ciphers "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
     ssl_ciphers "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
     ssl_ecdh_curve secp384r1; # Requires nginx >= 1.1.0
     ssl_session_cache shared:SSL:10m;
     ssl_session_tickets off; # Requires nginx >= 1.5.9
-    # ssl_stapling on; # Requires nginx >= 1.3.7
     ssl_stapling_verify on; # Requires nginx => 1.3.7
 
     ##
@@ -70,7 +66,6 @@ http {
     # Proxy Headers
     ##
     include /etc/nginx/proxy.conf;   #设置代理头信息
-    #more_set_headers 'Server: tbdress-DL-1';
 
     ##
     # filter ip
