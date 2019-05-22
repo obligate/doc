@@ -3,6 +3,7 @@
 + Keepalived是一个基于VRRP协议来实现的服务高可用方案，VRRP全称 Virtual Router Redundancy Protocol，即 虚拟路由冗余协议。可以认为它是实现路由器高可用的容错协议，即将N台提供相同功能的路由器组成一个路由器组(Router Group)，这个组里面有一个master和多个backup，但在外界看来就像一台一样，构成虚拟路由器，拥有一个虚拟IP（vip，也就是路由器所在局域网内其他机器的默认路由），占有这个IP的master实际负责ARP相应和转发IP数据包，组中的其它路由器作为备份的角色处于待命状态。master会发组播消息，当backup在超时时间内收不到vrrp包时就认为master宕掉了，这时就需要根据VRRP的优先级来选举一个backup当master，保证路由器的高可用
 + keepalived在一个节点上启动之后，会生成一个Master主进程，这个主进程又会生成两个子进程，分别是VRRP Stack（实现vrrp协议的） Checkers(检测ipvs后端realserver的健康状况检测)
 + VRRP双方节点都启动以后，要实现状态转换的，刚开始启动的时候，初始状态都是BACKUP，而后向其它节点发送通告，以及自己的优先级信息，谁的优先级高，就转换为MASTER，否则就还是BACKUP，这时候服务就在状态为MASTER的节点上启动，为用户提供服务，如果，该节点挂掉了，则转换为BACKUP，优先级降低，另一个节点转换为MASTER，优先级上升，服务就在此节点启动，VIP,VMAC都会被转移到这个节点上，为用户提供服务
++ keepalived的HA分为抢占模式和非抢占模式，抢占模式即MASTER从故障中恢复后，会将VIP从BACKUP节点中抢占过来。非抢占模式即MASTER恢复后不抢占BACKUP升级为MASTER后的VIP,more是抢占模式
 + 这种方案，使用一个vip地址，前端使用2台机器，一台做主，一台做备，但同时只有一台机器工作，另一台备份机器在主机器不出现故障的时候，永远处于浪费状态，对于服务器不多的网站，该方案不经济实惠
 + 1.keepalived
 + 2.nginx
@@ -87,32 +88,37 @@ notification_email {
    router_id LVS_DEVEL
 }
 
+## keepalived会定时执行脚本并对脚本执行的结果进行分析,动态调整vrrp_instance的优先级。
+##如果脚本执行结果为0,并且weight配置的值大于0,则优先级相应的增加。如果脚本执行结果非0,
+##并且weight配置的值小于 0,则优先级相应的减少。其他情况,维持原本配置的优先级,即配置文件中priority对应的值。
 vrrp_script chk_http_port {
                 script "/etc/keepalived/check_nginx.sh"
-                interval 4
-                weight 2
+                interval 4      #每2秒检测一次nginx的运行状态
+                weight 2        #失败一次，将自己的优先级-2
 
 }
 
 vrrp_instance VI_1 {
-state MASTER                # 开启后，该节点的优先级比另一节点的优先级高，所以转化为MASTER状态
-interface ens160            # 所有的通告等信息都从eth0这个接口出去
-virtual_router_id 66
-priority 100                # 修改优先级
-advert_int 1
+state MASTER                # 状态，主节点为MASTER，备份节点为BACKUP
+interface ens160            # 绑定VIP的网络接口，通过ifconfig查看自己的网络接口
+virtual_router_id 66        # 虚拟路由的ID号,两个节点设置必须一样,可选IP最后一段使用,相同的VRID为一个组,他将决定多播的MAC地址
+priority 100                # 节点优先级，值范围0～254，MASTER要比BACKUP高
+advert_int 1                # 组播信息发送时间间隔，两个节点必须设置一样，默认为1秒
+# 设置验证信息，两个节点必须一致
 authentication {
 auth_type PASS
 auth_pass 1111
   }
 
 track_script {
-chk_http_port
+chk_http_port    # nginx存活状态检测脚本
   }
 
 track_script {
-chk_https_port
+chk_https_port    # nginx存活状态检测脚本
   }
 
+# 虚拟IP，两个节点设置必须一样。可以设置多个，一行写一个
 virtual_ipaddress {    # 虚拟地址，即VIP
 172.16.1.116
   } 
@@ -197,15 +203,16 @@ vrrp_instance VI_1 {          //定义虚拟路由，VI_1 为虚拟路由的标�
 }
 ```
 ### 在双服务器上添加检测脚本
+分别在主备服务器/etc/keepalived目录下创建nginx_check.sh脚本，并为其添加执行权限chmod +x /etc/keepalived/nginx_check.sh。用于keepalived定时检测nginx的服务状态，如果nginx停止了，会尝试重新启动nginx，如果启动失败，会将keepalived进程杀死，将vip漂移到备份机器上。
 ```
 vim /etc/keepalived/check_nginx.sh
 #!/bin/bash
 if [ $(ps -C nginx --no-header | wc -l) -eq 0 ]; then
-        systemctl start nginx.service
+        systemctl start nginx.service     #尝试重新启动nginx
 fi
-sleep 2
+sleep 2                                   #睡眠2秒
 if [ $(ps -C nginx --no-header | wc -l) -eq 0 ]; then
-       systemctl stop keepalived.service
+       systemctl stop keepalived.service    #启动失败，将keepalived服务杀死。将vip漂移到其它备份节点
 fi
 ```
 ### 启动Nginx、keepalive服务
