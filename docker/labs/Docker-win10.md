@@ -24,7 +24,9 @@ docker exec -it centos7 /bin/bash
 ```
 ![win10 docker centos container](../img/win10_docker_centos7.png)
 + 通过宿主机无法ping通
+
 ![win10 host ping centos7](../img/wn10_host_ping_centos.png)
+
 ### 配置宿主机的路由实现互通
 + 查看宿主机路由，`route print`
 ![win10 route print](../img/win10_route_print.png)  
@@ -35,3 +37,58 @@ docker exec -it centos7 /bin/bash
 > 删除路由 `route delete  172.17.0.0 MASK 255.255.255.0 10.0.75.2`
 + 重新ping容器地址,现在则可以直接通过ip访问
 ![win10 host ping centos7](../img/win10_host_ping_centos7.png)
+
+
+
+## 启动nginx
+### install
+```
+docker search nginx
+docker pull nginx
+docker images nginx
+docker run --name nginx_aa -p 8081:80 -d nginx             # -d设置容器在在后台一直运行     -p 端口进行映射，将本地 8081 端口映射到容器内部的 80 端口  --name  nginx_aa 为容器的名字
+docker ps
+在浏览器中打开 http://127.0.0.1:8081/                       # 如何通过虚拟机的80端口访问呢？
+```
+### 部署
++ 宿主机创建目录 nginx, 用于存放后面的相关东西
+```
+mkdir -p ~/nginx/www ~/nginx/logs ~/nginx/conf
+```
++ 拷贝容器内 Nginx 默认配置文件到本地当前目录下的 conf 目录，容器 ID 可以查看 docker ps 命令输入中的第一列
+```
+docker cp 容器id:/etc/nginx/nginx.conf ~/nginx/conf
+# www: 目录将映射为 nginx 容器配置的虚拟目录
+# logs: 目录将映射为 nginx 容器的日志目录
+# conf: 目录里的配置文件将映射为 nginx 容器的配置文件
+```
++ 部署,win10下会要求开启映射目录的共享
+```
+docker run -d -p 8082:80 --name nginx_bb -v ~/nginx/www:/usr/share/nginx/html -v ~/nginx/conf/nginx.conf:/etc/nginx/nginx.conf -v ~/nginx/logs:/var/log/nginx  nginx
+# -p 8082:80： 将容器的 80 端口映射到主机的 8082 端口
+# --name nginx_bb：将容器命名为 nginx_bb
+# ~/nginx/www:/usr/share/nginx/html：将我们自己创建的 www 目录挂载到容器的 /usr/share/nginx/html
+# -v ~/nginx/conf/nginx.conf:/etc/nginx/nginx.conf：将我们自己创建的 nginx.conf 挂载到容器的 /etc/nginx/nginx.conf
+# -v ~/nginx/logs:/var/log/nginx：将我们自己创建的 logs 挂载到容器的 /var/log/nginx
+```
++ 进入宿主机的 `~/nginx/www` 目录
+`cd ~/nginx/www`
+创建 index.html 文件，内容如下
+```
+vim index.html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>nginx bb</title>
+</head>
+<body>
+    <h1>我的第一个标题</h1>
+    <p>我的第一个段落。</p>
+</body>
+</html>
+```
+在浏览器中打开 http://127.0.0.1:8082/  
++ 重新载入
+如果要重新载入 NGINX 可以使用以下命令发送 HUP 信号到容器 `docker kill -s HUP container-name`
+重启重启 NGINX 容器命令 `docker restart container-name`
