@@ -5,11 +5,11 @@ docker run -itd -p 44077:22 --name centos7 --privileged=true  centos  /usr/sbin/
 docker ps 
 docker exec -it centos7 /bin/bash
 yum install initscripts   -y                        # 可以使用ip a 和service命令
-yum -y install net-tools                          # ifconfig
-netstat -antp | grep sshd                        # 查看是否启动22端口
-yum install openssh-server -y                 # install ssh service
+yum -y install net-tools                            # ifconfig
+netstat -antp | grep sshd                           # 查看是否启动22端口
+yum install openssh-server -y                       # install ssh service
 service sshd start                                    
-ssh -p 44077 root@宿主机ip          # 通过宿主机ip登录centos7，本地直接用127.0.0.1
+ssh -p 44077 root@宿主机ip                          # 通过宿主机ip登录centos7，本地直接用127.0.0.1,如何使用虚拟机的ip呢
 docker start 容器id或者名称
 docker logs 容器id或者名称
 ```
