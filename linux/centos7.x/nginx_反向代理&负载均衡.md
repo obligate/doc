@@ -86,8 +86,8 @@ www.cc.com       当访问www.cc.com的时候实际上，nginx 转发到了127.0
 
 
 # 2.反向代理使用方式2--upstream lbproxyaa,只配置一个ip，实现转发
-## upstream
-nginx 的upstream 目前支持4 种方式的分配:
+## upstream 负载均衡池
+nginx 的upstream 目前支持4 种负载均衡策略方式的分配:
 - 1)、轮询（默认）。每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down 掉，能自动剔除。
 - 2)、weight 权重——you can you up。指定轮询几率，weight 和访问比率成正比，用于后端服务器性能不均的情况。
 - 3)、ip_hash ip 哈希算法。每个请求按访问ip 的hash 结果分配，这样每个访客固定访问一个后端服务器，==>可以解决session 的问题。
@@ -139,8 +139,8 @@ upstream lbaa {
 	server 192.168.0.10:7003 weight=3;
 }
 ```
-## upstream
-nginx 的upstream 目前支持3 种方式的分配:
+## upstream -- 负载均衡池
+nginx 的upstream 目前支持4 种负载均衡策略方式的分配:
 - 1)、轮询（默认）。每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down 掉，能自动剔除。
 - 2)、weight 权重——you can you up。指定轮询几率，weight 和访问比率成正比，用于后端服务器性能不均的情况。
 - 3)、ip_hash ip 哈希算法。每个请求按访问ip 的hash 结果分配，这样每个访客固定访问一个后端服务器，==>可以解决session 的问题。
