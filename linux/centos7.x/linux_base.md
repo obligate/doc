@@ -289,6 +289,8 @@ vim /etc/fstab
 hostnamectl set-hostname node_master                       # 修改hostname
 ```
 ### 安装EPEL
++ yum命令安装 `yum install epel-release -y`
++ 手工安装
 ```
 rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 yum -y install epel-release
