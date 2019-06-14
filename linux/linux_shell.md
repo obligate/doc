@@ -774,7 +774,7 @@ EOF
 ### /dev/null文件
 + 如果希望执行某个命令，但又不希望在屏幕上显示输出结果，那么可以将输出重定向到 /dev/null,语法:`command > /dev/null`
 + `/dev/null` 是一个特殊的文件，写入到它的内容都会被丢弃；如果尝试从该文件读取内容，那么什么也读不到。但是 /dev/null 文件非常有用，将命令的输出重定向到它，会起到"禁止输出"的效果
-+ 如果希望屏蔽 stdout 和 stderr，可以这样写 `command > /dev/null 2>&1`,合并标准输出1和标准错误2，输入到文件/dev/null,实现屏蔽stdout和stderr的效果
++ 如果希望屏蔽 stdout 和 stderr，可以这样写 `command > /dev/null 2>&1`,合并标准输出1和标准错误2，输出到文件/dev/null,实现屏蔽stdout和stderr的效果
 
 
 ## Shell文件包含
@@ -798,7 +798,6 @@ smart_name="Whisper"
 . ./test1.sh
 # 或者使用以下包含文件代码
 # source ./test1.sh
-
 echo "smart name ：${smart_name}"
 ```
 + 执行
@@ -810,3 +809,4 @@ echo "smart name ：${smart_name}"
 ```
 smart name ：Whisper
 ```
+> 注：被包含的文件 test1.sh 不需要可执行权限
