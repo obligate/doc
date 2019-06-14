@@ -18,7 +18,25 @@
   - [Shell注释](#Shell注释) 
     - [单行注释](#单行注释)
     - [多行注释](#多行注释)
-
+  - [Shell传递参数](#Shell参数)
+    - [注意事项](#注意事项)
+    - [实例](#实例)
+    - [特殊字符](#特殊字符)
+      - [特殊字符实例](#特殊字符实例)
+  - [Shell基本运算符](#Shell基本运算符)
+    - [算数运算符](#算数运算符)
+    - [关系运算符](#关系运算符)
+    - [布尔运算符](#布尔运算符)
+    - [字符串运算符](#字符串运算符)
+    - [文件测试运算符](#文件测试运算符)
+  - [Shell输入/输出重定向](#Shell输入/输出重定向)
+    - [命令列表](#命令列表)
+    - [输出重定向](#输出重定向)
+    - [输入重定向](#输入重定向)
+    - [重定向深入讲解](#重定向深入讲解)
+    - [特殊的重定向方式Here Doucument](#特殊的重定向方式)
+    - [/dev/null文件](#/dev/null文件)
+  - [Shell 文件包含](#Shell文件包含)
 # Shell编程
 ## shell历史
 shell的作用是解释执行用户的命令，用户输入一条命令，shell就解释执行一条，这种方式称为交互式(Interactive),shell还有一种执行命令的方式称为批处理(Batch),用户事先写一个Shell脚本(Script),其中有很多条命令，让shell一次把这些命令执行完，而不必一条一条地敲命令。Shell脚本和编程语言很相似，也有变量和流程控制语句，但Shell脚本是解释执行的，不需要编译，Shell程序从脚本中一行一行读取并执行这些命令，相当于一个用户把脚本中的命令一行一行敲到Shell提示符下执行。
@@ -240,4 +258,555 @@ EOF 也可以使用其他符号
 注释内容...
 注释内容...
 !
+```
+
+## Shell参数
+我们可以在执行 Shell 脚本时，向脚本传递参数，脚本内获取参数的格式为：$n。n 代表一个数字，1 为执行脚本的第一个参数，2 为执行脚本的第二个参数，以此类推,其中 $0 为执行的文件名
+### 注意事项
+> 在为shell脚本传递的参数中如果包含空格，应该使用单引号或者双引号将该参数括起来，以便于脚本将这个参数作为整体来接收
+> 在有参数时，可以使用对参数进行校验的方式处理以减少错误发生
+```
+if [ -n "$1" ]; then
+    echo "包含第一个参数"
+else
+    echo "没有包含第一参数"
+fi
+```
+> 中括号 [] 与其中间的代码应该有空格隔开
+> 在进行字符串比较时，最好使用双中括号 [[ ]]. 因为单中括号可能会导致一些错误，因此最好避开它们
+> 检查两个字符串是否相同 `[[ $str1 = $str2 ]]`, 当 str1等于str1等于str2 时，返回真。也就是说，str1 和 str2 包含的文本是一样的,其中的单等于号也可以写成双等于号
+> 上面的字符串比较等效于 `[[ $str1 == $str2 ]]`, 注意 = 前后有一个空格，如果忘记加空格, 就变成了赋值语句，而非比较关系了
+> 算术比较, 比如一个变量是否为0, [ $var -eq 0 ]
+> 文件属性测试，比如一个文件是否存在，[ -e $var ], 是否是目录，[ -d $var ]
+> [] 常常可以使用 test 命令来代替,`if [ $var -eq 0 ]; then echo "True"; fi` 等价于`if test $var -eq 0; then echo "True"; fi`
+
+### 实例
++ 创建`test_argument.sh`
+```
+vim test_argument.sh
+#!/bin/bash
+echo "Shell 传递参数实例";
+echo "执行的文件名：$0";
+echo "第一个参数为：$1";
+echo "第二个参数为：$2";
+echo "第三个参数为：$3";
+```
++ 执行脚本,并传入3个参数
+```
+chmod u+x test_argument.sh 
+./test_argument.sh 1 2 3 
+```
++ 执行结果
+```
+Shell 传递参数实例
+执行的文件名：./test_argument.sh
+第一个参数为：1
+第二个参数为：2
+第三个参数为：3
+```
+### 特殊字符
++ `$#` 传递到脚本的参数个数
++ `$*` 使用时加引号 `"$*"`,以"$1 $2 … $n"的形式输出所有参数
++ `$@` 使用时加引号 `"$@"`,以"$1" "$2" … "$n" 的形式输出所有参数
++ `$?` 显示最后命令的退出状态。0表示没有错误，其他任何值表明有错误。
+  
+#### 特殊字符实例
++ 创建文件`test_special_char.sh`
+```
+vim test_special_char.sh
+#!/bin/bash
+echo "-- \$* 演示 ---"
+echo "参数个数\$#：$#"
+for i in "$*"; do
+    echo $i
+done
+
+echo "-- \$@ 演示 ---"
+echo "参数个数\$#：$#"
+for i in "$@"; do
+    echo $i
+done
+```
++ 执行脚本，并出入3个参数，看一下`$*`和`$@`区别
+```
+chmod u+x test_special_char.sh
+./test_special_char.sh 1 2 3
+```
++ 执行结果
+```
+-- $* 演示 ---
+参数个数$#：3
+1 2 3
+-- $@ 演示 ---
+参数个数$#：3
+1
+2
+3
+```
+
+## Shell基本运算符
++ 算数运算符     `+ - * \ % = == !=`
++ 关系运算符
++ 布尔运算符
++ 字符串运算符
++ 文件测试运算符
+  
+> 原生bash不支持简单的数学运算，但是可以通过其他命令来实现，例如 `awk` 和 `expr`，`expr` 最常用,`expr` 是一款表达式计算工具，使用它能完成表达式的求值操作
+> 数学运算 `expr 表达式` 等同于 `$((表达式))`, `$((表达式))`此处表达式中的 "*" 不需要转义符号 "\" 
+例如两个数相加(注意使用的是反引号 ` 而不是单引号 ')
+```
+#!/bin/bash
+val=`expr 2 + 2`
+echo "两数之和为 : $val"
+```
+输出结果 `两数之和为 : 4`
+> 表达式和运算符之间要有空格，例如 `2+2` 是不对的，必须写成` 2 + 2`
+> 完整的表达式要被 ` ` 包含，注意这个字符不是常用的单引号，在 Esc 键下边
+
+### 算数运算符
+假定变量 a 为 10，变量 b 为 20
+```
++   加法                                            `expr $a + $b` 结果为 30
+-   减法                                            `expr $a - $b` 结果为 -10
+*   乘法                                            `expr $a \* $b` 结果为  200。
+/   除法                                            `expr $b / $a` 结果为 2
+%   取余                                            `expr $b % $a` 结果为 0
+=   赋值                                             a=$b 将把变量 b 的值赋给 a
+==  相等。用于比较两个数字，相同则返回 true            [ $a == $b ] 返回 false
+!=  不相等。用于比较两个数字，不相同则返回 true         [ $a != $b ] 返回 true
+```
+> 注意：条件表达式要放在方括号之间，并且要有空格，例如: [$a==$b] 是错误的，必须写成 [ $a == $b ]。
+> 乘号(*)前边必须加反斜杠(\)才能实现乘法运算
+```
+#!/bin/bash
+a=10
+b=20
+
+val=`expr $a + $b`
+echo "a + b : $val"
+
+val=`expr $a - $b`
+echo "a - b : $val"
+
+val=`expr $a \* $b`
+echo "a * b : $val"
+
+val=`expr $b / $a`
+echo "b / a : $val"
+
+val=`expr $b % $a`
+echo "b % a : $val"
+
+if [ $a == $b ]
+then
+   echo "a 等于 b"
+fi
+if [ $a != $b ]
+then
+   echo "a 不等于 b"
+fi
+```
+输出结果
+```
+a + b : 30
+a - b : -10
+a * b : 200
+b / a : 2
+b % a : 0
+a 不等于 b
+```
+
+### 关系运算符
+**关系运算符只支持数字，不支持字符串，除非字符串的值是数字**
+```
+假定变量 a 为 10，变量 b 为 20
+-eq   检测两个数是否相等，相等返回 true                           [ $a -eq $b ] 返回 false
+-ne   检测两个数是否不相等，不相等返回 true                       [ $a -ne $b ] 返回 true
+-gt   检测左边的数是否大于右边的，如果是，则返回 true              [ $a -gt $b ] 返回 false
+-lt   检测左边的数是否小于右边的，如果是，则返回 true              [ $a -lt $b ] 返回 true
+-ge   检测左边的数是否大于等于右边的，如果是，则返回 true           [ $a -ge $b ] 返回 false
+-le   检测左边的数是否小于等于右边的，如果是，则返回 true           [ $a -le $b ] 返回 true
+```
+#### 实例
+```
+#!/bin/bash
+a=10
+b=20
+
+if [ $a -eq $b ]
+then
+   echo "$a -eq $b : a 等于 b"
+else
+   echo "$a -eq $b: a 不等于 b"
+fi
+if [ $a -ne $b ]
+then
+   echo "$a -ne $b: a 不等于 b"
+else
+   echo "$a -ne $b : a 等于 b"
+fi
+if [ $a -gt $b ]
+then
+   echo "$a -gt $b: a 大于 b"
+else
+   echo "$a -gt $b: a 不大于 b"
+fi
+if [ $a -lt $b ]
+then
+   echo "$a -lt $b: a 小于 b"
+else
+   echo "$a -lt $b: a 不小于 b"
+fi
+if [ $a -ge $b ]
+then
+   echo "$a -ge $b: a 大于或等于 b"
+else
+   echo "$a -ge $b: a 小于 b"
+fi
+if [ $a -le $b ]
+then
+   echo "$a -le $b: a 小于或等于 b"
+else
+   echo "$a -le $b: a 大于 b"
+fi
+```
+输出
+```
+10 -eq 20: a 不等于 b
+10 -ne 20: a 不等于 b
+10 -gt 20: a 不大于 b
+10 -lt 20: a 小于 b
+10 -ge 20: a 小于 b
+10 -le 20: a 小于或等于 b
+```
+### 布尔运算符
+```
+假定变量 a 为 10，变量 b 为 20
+!	   非运算，表达式为 true 则返回 false，否则返回 true。	  [ ! false ] 返回 true。
+-o	 或运算，有一个表达式为 true 则返回 true。	           [ $a -lt 20 -o $b -gt 100 ] 返回 true。
+-a	 与运算，两个表达式都为 true 才返回 true。	           [ $a -lt 20 -a $b -gt 100 ] 返回 false。
+```
+#### 实例
+```
+#!/bin/bash
+a=10
+b=20
+
+if [ $a != $b ]
+then
+   echo "$a != $b : a 不等于 b"
+else
+   echo "$a == $b: a 等于 b"
+fi
+if [ $a -lt 100 -a $b -gt 15 ]
+then
+   echo "$a 小于 100 且 $b 大于 15 : 返回 true"
+else
+   echo "$a 小于 100 且 $b 大于 15 : 返回 false"
+fi
+if [ $a -lt 100 -o $b -gt 100 ]
+then
+   echo "$a 小于 100 或 $b 大于 100 : 返回 true"
+else
+   echo "$a 小于 100 或 $b 大于 100 : 返回 false"
+fi
+if [ $a -lt 5 -o $b -gt 100 ]
+then
+   echo "$a 小于 5 或 $b 大于 100 : 返回 true"
+else
+   echo "$a 小于 5 或 $b 大于 100 : 返回 false"
+fi
+```
+输出结果
+```
+10 != 20 : a 不等于 b
+10 小于 100 且 20 大于 15 : 返回 true
+10 小于 100 或 20 大于 100 : 返回 true
+10 小于 5 或 20 大于 100 : 返回 false
+```
+
+### 逻辑运算符
+```
+假定变量 a 为 10，变量 b 为 20
+&&	 逻辑的 AND	          [[ $a -lt 100 && $b -gt 100 ]]    返回 false
+||	 逻辑的 OR	          [[ $a -lt 100 || $b -gt 100 ]]      返回 true
+```
+#### 实例
+```
+#!/bin/bash
+a=10
+b=20
+
+if [[ $a -lt 100 && $b -gt 100 ]]
+then
+   echo "返回 true"
+else
+   echo "返回 false"
+fi
+
+if [[ $a -lt 100 || $b -gt 100 ]]
+then
+   echo "返回 true"
+else
+   echo "返回 false"
+fi
+```
+输出结果
+```
+返回 false
+返回 true
+```
+
+### 字符串运算符
+```
+假定变量 a 为 "abc"，变量 b 为 "efg"
+=	    检测两个字符串是否相等，相等返回 true。	      [ $a = $b ] 返回 false。
+!=	  检测两个字符串是否相等，不相等返回 true。	    [ $a != $b ] 返回 true。
+-z	  检测字符串长度是否为0，为0返回 true。	       [ -z $a ] 返回 false。
+-n	  检测字符串长度是否为0，不为0返回 true。	     [ -n "$a" ] 返回 true。
+$	    检测字符串是否为空，不为空返回 true。	       [ $a ] 返回 true。
+```
+#### 实例
+```
+#!/bin/bash
+a="abc"
+b="efg"
+
+if [ $a = $b ]
+then
+   echo "$a = $b : a 等于 b"
+else
+   echo "$a = $b: a 不等于 b"
+fi
+if [ $a != $b ]
+then
+   echo "$a != $b : a 不等于 b"
+else
+   echo "$a != $b: a 等于 b"
+fi
+if [ -z $a ]
+then
+   echo "-z $a : 字符串长度为 0"
+else
+   echo "-z $a : 字符串长度不为 0"
+fi
+if [ -n "$a" ]
+then
+   echo "-n $a : 字符串长度不为 0"
+else
+   echo "-n $a : 字符串长度为 0"
+fi
+if [ $a ]
+then
+   echo "$a : 字符串不为空"
+else
+   echo "$a : 字符串为空"
+fi
+```
+输出结果
+```
+abc = efg: a 不等于 b
+abc != efg : a 不等于 b
+-z abc : 字符串长度不为 0
+-n abc : 字符串长度不为 0
+abc : 字符串不为空
+```
+### 文件测试运算符
+```
+-b file	     检测文件是否是块设备文件，如果是，则返回 true。	                            [ -b $file ] 返回 false。
+-c file	     检测文件是否是字符设备文件，如果是，则返回 true。	                          [ -c $file ] 返回 false。
+-d file	     检测文件是否是目录，如果是，则返回 true。	                                 [ -d $file ] 返回 false。
+-f file	     检测文件是否是普通文件（既不是目录，也不是设备文件），如果是，则返回 true。 	  [ -f $file ] 返回 true。
+-g file	     检测文件是否设置了 SGID 位，如果是，则返回 true。	                         [ -g $file ] 返回 false。
+-k file	     检测文件是否设置了粘着位(Sticky Bit)，如果是，则返回 true。	               [ -k $file ] 返回 false。
+-p file	     检测文件是否是有名管道，如果是，则返回 true。	                             [ -p $file ] 返回 false。
+-u file	     检测文件是否设置了 SUID 位，如果是，则返回 true。	                         [ -u $file ] 返回 false。
+-r file	     检测文件是否可读，如果是，则返回 true。	                                   [ -r $file ] 返回 true。
+-w file	     检测文件是否可写，如果是，则返回 true。	                                   [ -w $file ] 返回 true。
+-x file	     检测文件是否可执行，如果是，则返回 true。	                                 [ -x $file ] 返回 true。
+-s file	     检测文件是否为空（文件大小是否大于0），不为空返回 true。	                    [ -s $file ] 返回 true。
+-e file	     检测文件（包括目录）是否存在，如果是，则返回 true。	                        [ -e $file ] 返回 true。
+```
+
+#### 实例
+```
+#!/bin/bash
+file="/home/Peter/test.sh"
+if [ -r $file ]
+then
+   echo "文件可读"
+else
+   echo "文件不可读"
+fi
+if [ -w $file ]
+then
+   echo "文件可写"
+else
+   echo "文件不可写"
+fi
+if [ -x $file ]
+then
+   echo "文件可执行"
+else
+   echo "文件不可执行"
+fi
+if [ -f $file ]
+then
+   echo "文件为普通文件"
+else
+   echo "文件为特殊文件"
+fi
+if [ -d $file ]
+then
+   echo "文件是个目录"
+else
+   echo "文件不是个目录"
+fi
+if [ -s $file ]
+then
+   echo "文件不为空"
+else
+   echo "文件为空"
+fi
+if [ -e $file ]
+then
+   echo "文件存在"
+else
+   echo "文件不存在"
+fi
+```
+输出结果
+```
+文件可读
+文件可写
+文件可执行
+文件为普通文件
+文件不是个目录
+文件不为空
+文件存在
+```
+
+## Shell输入/输出重定向
+### 命令列表
+```
+command > file	              将输出重定向到 file。
+command < file	              将输入重定向到 file。
+command >> file	              将输出以追加的方式重定向到 file。
+n > file	                    将文件描述符为 n 的文件重定向到 file。
+n >> file	                    将文件描述符为 n 的文件以追加的方式重定向到 file。
+n >& m	                      将输出文件 m 和 n 合并。
+n <& m	                      将输入文件 m 和 n 合并。
+<< tag	                      将开始标记 tag 和结束标记 tag 之间的内容作为输入。
+```
+> 需要注意的是文件描述符 0 通常是标准输入（STDIN），1 是标准输出（STDOUT），2 是标准错误输出（STDERR）
+
+### 输出重定向
+语法： `command1 > file1`，这个命令执行command1然后将输出的内容存入file1
+> 注意任何file1内的已经存在的内容将被新内容替代。如果要将新内容添加在文件末尾，请使用`>>`操作符
+```
+who > users                # 将who命令的完整的输出重定向在用户文件中(users),执行后，并没有在终端输出信息，这是因为输出已被从默认的标准输出设备（终端）重定向到指定的文件
+cat users                  # 使用 cat 命令查看文件内容
+```
+
+### 输入重定向
+语法： `command1 < file1` 这个命令从键盘获取输入的命令会转移到文件读取内容
+```
+wc -l users                # 2 users
+wc -l < users              # 2
+```
+> 注意：上面两个例子的结果不同：第一个例子，会输出文件名；第二个不会，因为它仅仅知道从标准输入读取内容
+
+### 重定向深入讲解
+`command1 < infile > outfile`  同时替换输入和输出，执行command1，从文件infile读取内容，然后将输出写入到outfile中
+一般情况下，每个 Unix/Linux 命令运行时都会打开三个文件
++ 标准输入文件(stdin)：stdin的文件描述符为0，Unix程序默认从stdin读取数据
++ 标准输出文件(stdout)：stdout 的文件描述符为1，Unix程序默认向stdout输出数据
++ 标准错误文件(stderr)：stderr的文件描述符为2，Unix程序会向stderr流中写入错误信息
+默认情况下，command > file 将 stdout 重定向到 file，command < file 将stdin 重定向到 file
+```
+command 2 > file                                # stderr 重定向到 file
+command 2 >> file                               # stderr 追加到 file 文件末尾
+command > file 2>&1                             # 将 stdout 和 stderr 合并后重定向到 file
+command >> file 2>&1                            # 将 stdout 和 stderr 合并后重定向到 file
+command < file1 >file2                          # 将 stdin 重定向到 file1，将 stdout 重定向到 file2
+``` 
+### 特殊的重定向方式
+Here Document 是 Shell 中的一种特殊的重定向方式，用来将输入重定向到一个交互式 Shell 脚本或程序,语法：
+```
+command << delimiter
+    document
+delimiter
+```
+它的作用是将两个 delimiter 之间的内容(document) 作为输入传递给 command
+> 注意：
+> 结尾的delimiter 一定要顶格写，前面不能有任何字符，后面也不能有任何字符，包括空格和 tab 缩进
+> 开始的delimiter前后的空格会被忽略掉
+
+#### 实例
++ 在命令行中通过 wc -l 命令计算 Here Document 的行数
+```
+wc -l << EOF
+    Whisper
+    Thunder
+    Misty
+EOF
+```
+输出
+```
+3          # 输出结果为 3 行
+```
++ 在脚本中使用Here Document
+```
+#!/bin/bash
+cat << EOF
+    Whisper
+    Thunder
+    Misty
+EOF
+```
+输出结果
+```
+ Whisper
+ Thunder
+ Misty
+```
+
+### /dev/null文件
+如果希望执行某个命令，但又不希望在屏幕上显示输出结果，那么可以将输出重定向到 /dev/null,语法:`command > /dev/null`
+`/dev/null` 是一个特殊的文件，写入到它的内容都会被丢弃；如果尝试从该文件读取内容，那么什么也读不到。但是 /dev/null 文件非常有用，将命令的输出重定向到它，会起到"禁止输出"的效果
+如果希望屏蔽 stdout 和 stderr，可以这样写 `command > /dev/null 2>&1`,合并标准输出1和标准错误2，输入到文件/dev/null,实现屏蔽stdout和stderr的效果
+
+
+## Shell文件包含
+Shell 也可以包含外部脚本。这样可以很方便的封装一些公用的代码作为一个独立的文件,语法格式：
+```
+. filename   # 注意点号(.)和文件名中间有一空格
+或
+source filename
+```
+### 实例
+创建两个 shell 脚本文件test1.sh,test2.sh,在test2.sh中通过`source`或者`.`引入test1.sh，注意在test2.sh就可以使用test1.sh定义的一些变量
++ `test1.sh`
+```
+#!/bin/bash
+smart_name="Wishper"
+```
++ `test2.sh`
+```
+#!/bin/bash
+#使用 . 号来引用test1.sh 文件
+. ./test1.sh
+# 或者使用以下包含文件代码
+# source ./test1.sh
+
+echo "smart name ：${smart_name}"
+```
++ 执行
+```
+ chmod u+x test2.sh
+ ./test2.sh 
+```
+输出结果
+```
+smart name ：Wishper
 ```
