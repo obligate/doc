@@ -43,9 +43,7 @@ b=2
 c=3
 d=
 ```
-> option_string a:b:c:d 
-> a,b,c后都有`:`，d后没有`: `
-> **所以可以获取到a,b,c的值** 
+> option_string `a:b:c:d`, a,b,c后都有`:`，d后没有`: ` **所以可以获取到a,b,c的值** 
 
 + 执行2 `-c 不传值`,此时会报错，如何解决，可以在option_string前加`:`
 ```
