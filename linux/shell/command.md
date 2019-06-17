@@ -107,7 +107,7 @@ d=
 
 
 ### optstring选项之间直接连接
-+ optstring选项之间直接连接`ab:`，相当于a可以不用传入值，b后面有`:`需要传入值
++ optstring选项之间直接连接`ab:`，相当于a可以不用传入值，b后面有`:`需要传入值,执行的时候可以传入`-ab 1`或者`-b 1`
 + 创建文件`vim test_getopts_3.sh`
 ```
 #!/bin/sh
@@ -133,4 +133,10 @@ get a non option $OPTARG and OPTION is :
 ```
 ./test_getopts_3.sh -a 1 -b 1
 get option a and parameter is 
+```
++ 执行3输出
+```
+./test_getopts_3.sh  -b 1 -c 1
+get option b and parameter is 1
+get option c and parameter is 1
 ```
