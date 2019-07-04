@@ -48,7 +48,7 @@ server {
   # proxy_read_timeout 5s;
   proxy_send_timeout 5s;
   send_timeout 5s;
-▽ resolver_timeout 5s;
+  resolver_timeout 5s;
   client_body_timeout 5s;
 
   # buffer larger messages
