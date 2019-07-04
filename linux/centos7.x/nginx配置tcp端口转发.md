@@ -17,6 +17,7 @@ telnet--> nginx(30003) -->
 ## 2.配置nginx的tcp代理
 **请注意，stream块和http块是两个不同的模块，stream不属于http模块，即不能放到/etc/nginx/conf.d/，stream是通过tcp层转发，而不是http转发，如配置在http内，启动nginx会报如下错误**
 `nginx: [emerg] "server" directive is not allowed here`
+
 ![nginx tcp config结构](img/nginx_config_struct_http_tcp.png)
 
 ### 2.1 修改主配置文件，添加stream目录
