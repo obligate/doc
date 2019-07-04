@@ -1,8 +1,8 @@
 ## nginx实现跳转到https
-当用户访问http://www.aa.com的时候统一跳转到https://www.aa.com
+当用户访问 `http://www.aa.com`的时候统一跳转到`https://www.aa.com`
 
 
-## nginx.conf
+## `nginx.conf`
 ```
 user  nginx;
 worker_processes  1;
@@ -24,7 +24,7 @@ http {
 }
 ```
 
-## /etc/nginx/conf.d/www_aa_com.conf
+## `/etc/nginx/conf.d/www_aa_com.conf`
 ```
 server {
 
