@@ -120,3 +120,10 @@ cat /dev/urandom | tr -dc a-zA-Z0-9#@ | head -c 13;echo
 tr -dc 'a-z' < /dev/urandom | fold -w 8 | head -1
 ```
 > 备注:tr命令是替换或者删除字符的命令.-d的意思是删除后面集合中的字符,-c的意思是取反,就是说,除了后面的字符集合其他的都删除掉.我们可以通过后面的字符的集合来指定自己的密码复杂度
+
+
+
+## git 代码统计
+```
+git log --author="Linus Torvalds" --date=iso | perl -nalE 'if (/^Date:\s+[\d-]{10}\s(\d{2})/) { say $1+0 }' | sort | uniq -c|perl -MList::Util=max -nalE '$h{$F[1]} = $F[0]; }{ $m = max values %h; foreach (0..23) { $h{$_} = 0 if not exists $h{$_} } foreach (sort {$a <=> $b } keys %h) { say sprintf "%02d - %4d %s", $_, $h{$_}, "*"x ($h{$_} / $m * 50); }'
+```
