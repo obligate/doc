@@ -288,6 +288,19 @@ docker service update --publish-rm 8080:5000 --publish-add 8088:5000 web   ##更
 ## docker stack 更新,还是通过docker stack deploy的方式来进行service的更新操作
 docker stack deploy web -c=docker-compose.yml
 ```
+
+## 启动mysql
+```
+docker run --name life-mysql \
+-v /data/life-mysql/data:/var/lib/mysql \
+-v /data/life-mysql/conf:/etc/mysql/conf.d \
+-e MYSQL_ROOT_PASSWORD=qwe123 \
+-p 3306:3306 \
+-d \
+-e TZ=Asia/Shanghai \
+--restart=always \
+mysql:5.6
+```
 ## Refer
 + [Docker Hub](https://docs.docker.com)
 + [163 Hub](https://c.163yun.com/hub#/m/home/)
