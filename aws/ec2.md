@@ -67,3 +67,11 @@ UUID=015ca16e-df02-460e-a531-b3fcf2180777     /mnt        xfs    defaults,noatim
 [root@ip-172-31-21-158 ~]#sudo umount /data
 [root@ip-172-31-21-158 ~]#sudo mount -a
 ```
+
+## 扩容
++ 在aws的volume直接修改增加ebs的容量
++ 需要执行命令，让aws ec2识别`xfs_growfs -d /data `
+```
+sudo yum -y install xfsprogs      # centos 安装 xfs 
+sudo xfs_growfs -d /data          # 让aws ec2识别你的挂载点 /data
+```
