@@ -69,9 +69,30 @@ UUID=015ca16e-df02-460e-a531-b3fcf2180777     /mnt        xfs    defaults,noatim
 ```
 
 ## 扩容
-+ 在aws的volume直接修改增加ebs的容量
-+ 需要执行命令，让aws ec2识别`xfs_growfs -d /data `
+### 基于Nitro系统的
++ 扩展分区
+```
+lsblk
+sudo growpart /dev/nvme0n1 1
+lsblk
+```
++ 扩展文件系统
 ```
 sudo yum -y install xfsprogs      # centos 安装 xfs 
-sudo xfs_growfs -d /data          # 让aws ec2识别你的挂载点 /data
+sudo xfs_growfs -d /              # 让aws ec2识别你的挂载点 /
+df -h
+```
+### T2 实例上的
+### 扩展分区
+```
+lsblk
+sudo growpart /dev/xvda 1
+lsblk
+```
+### 扩展文件系统
++ 在aws的volume直接修改增加ebs的容量
++ 需要执行命令，让aws ec2识别`sudo resize2fs /dev/xvda1 `
+```
+sudo resize2fs /dev/xvda1
+df -h
 ```

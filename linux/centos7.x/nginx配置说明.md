@@ -87,6 +87,13 @@ http {
 	#以下为主要变量说明
 	# $http_x_forwarded_for：保存的就是X-Forwarded-For信息
 	# $host：客户端请求的Host头域值
+    # $remote_addr: 客户端ip
+    # $remote_user: 远程客户端用户名，一般为：’-’
+    # $time_local: 时间和时区
+    # $request: 请求的url以及method
+    # $body_bytes_send: 响应客户端内容字节数
+    # $http_user_agent: 用户所使用的代理，一般来时都是浏览器
+    # $http_x_forwarded_for: 通过代理服务器来记录客户端的ip
 	# $server_add：服务器IP地址
 	# $request_method：请求方法
 	# $http_referer：表示从哪个链接跳转过来
@@ -97,6 +104,7 @@ http {
 
 
    	#这个访问日志如果在编译时指定则这里会被禁用，同时不会显示实际路径，为了便于识别
+    #nginx 日志级别debug | info | notice | warn | error | crit | alert | emerg，错误级别从左到右越来越大
 	#在保持禁用的同时你修改为实际路径。这个访问日志格式使用的是上面定义的main格式。
     access_log  /var/log/nginx/access.log  detaile;
 	#下面这个加了一个 buffer 参数，含义是日志先同步到缓存中，这样提升性能，避免每产生
@@ -111,7 +119,7 @@ http {
 
     #连接超时时间
     #keepalive_timeout  0;
-    keepalive_timeout  65;
+    keepalive_timeout  65;    # 单位是秒
     tcp_nodelay        on;
     
     #开启gzip压缩

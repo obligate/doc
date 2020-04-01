@@ -131,3 +131,17 @@ sudo systemctl disable firewalld
 sudo firewall-cmd --state
 sudo systemctl status firewalld
 ```
+
+
+### 本地访问
+![install](https://kubernetes.io/zh/docs/tasks/tools/install-kubectl/#%e5%9c%a8-windows-%e4%b8%8a%e7%94%a8-chocolatey-%e5%ae%89%e8%a3%85-kubectl)
++ 创建一个config`~/.kube/config`
++ 本地访问
+```
+kubectl config view
+kubectl config set-context Name                        # Name为contexts中某一个context的Name
+kubectl config get-context
+kubectl config set-context --current --namespace test  # 切换命名空间为test
+kubectl get all                                        # 获取所有的
+kubectl get deployment tlz-cloud-app  -o yaml          # 查看某个deployment的yaml文件
+```
