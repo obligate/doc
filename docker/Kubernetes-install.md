@@ -14,6 +14,7 @@
 #### 安装kubectl
 ```
 # wget https://storage.googleapis.com/kubernetes-release/release/v1.9.0/bin/linux/amd64/kubectl
+# curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
 # install kubectl /usr/local/bin/
 # kubectl cluster-info
 ```
@@ -138,10 +139,33 @@ sudo systemctl status firewalld
 + 创建一个config`~/.kube/config`
 + 本地访问
 ```
+kubectl version               # 查看版本
+kubectl cluster-info          # 显示集群信息
+kubectl get nodes             # 查看集群中有几个node
+kubectl run my-nignx --image=nginx --replicas=2 --port=80   # 运行一个镜像
+kubectl get pods
+kubectl describe pod my-nginx-3333        # 查看服务详情
+kubectl delete pod my-nginx-3333          # 删除pod
+kubectl get deployments       # 查看已部署
+kubectl delete deployment my-nginx                          # 删除部署的my-nginx服务，彻底删除pod
 kubectl config view
-kubectl config set-context Name                        # Name为contexts中某一个context的Name
-kubectl config get-context
+kubectl config current-context                         # 显示当前的上下文
+kubectl config set-context Name                        # 切换上下文，Name为contexts中某一个context的Name
+kubectl config get-contexts
 kubectl config set-context --current --namespace test  # 切换命名空间为test
 kubectl get all                                        # 获取所有的
 kubectl get deployment tlz-cloud-app  -o yaml          # 查看某个deployment的yaml文件
+kubectl exec -it podName  -c  containerName -n namespace -- shell comand
+kubectl get pods  --all-namespaces -o=name       # 获取所有namespace下面的pod，输出name，慎用
+kubectl get pods -n meshop-dev03
+kubectl describe  pod meshop-mysql-57975fddc4-r2q8x  -n meshop-dev03
+kubectl exec -it meshop-mysql-57975fddc4-r2q8x  -n meshop-dev03 -- sh     # 通过bash获得 pod 中某个容器的TTY，相当于登录容器
+# 需要删除ns和ingress
+kubectl get ingress -o custom-columns=namespace:.metadata.namespace,name:.metadata.name  --all-namespaces    # 自定义输出列，获取所有namespace的ingress
+kubectl get ingress -n meshop-dev07
+kubectl delete ingress meshop-dev07 -n meshop-dev07
+kubectl get ns
+kubectl delete ns meshop-dev07
+## 
+kubectl get node --show-labels      # 查看节点 labels
 ```

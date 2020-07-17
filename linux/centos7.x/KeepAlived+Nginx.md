@@ -102,7 +102,7 @@ vrrp_instance VI_1 {
 state MASTER                # 状态，主节点为MASTER，备份节点为BACKUP
 interface ens160            # 绑定VIP的网络接口，通过ifconfig查看自己的网络接口
 virtual_router_id 66        # 虚拟路由的ID号,两个节点设置必须一样,可选IP最后一段使用,相同的VRID为一个组,他将决定多播的MAC地址
-priority 100                # 节点优先级，值范围0～254，MASTER要比BACKUP高
+priority 100                # 节点优先级，值范围0～254，MASTER要比BACKUP高，谁的优先级高，master挂掉，剩下优先级高的就会重新为master
 advert_int 1                # 组播信息发送时间间隔，两个节点必须设置一样，默认为1秒
 # 设置验证信息，两个节点必须一致
 authentication {
@@ -182,7 +182,7 @@ global_defs {
    notification_email_from kaadmin@localhost   //定义发件人，
    smtp_server 127.0.0.1                       //定义邮件服务器，一定不能使用外部地址
    smtp_connect_timeout 30                     //超时时间
-   router_id  LVS_DEVEL                       
+   router_id  LVS_DEVEL                        //当前安装keepalived节点主机的标识符， 全局唯一   
 }
 ```
 + 定义vrrp阶段

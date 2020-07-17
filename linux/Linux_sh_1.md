@@ -8,3 +8,7 @@
 
 ## 输出的讯息中，将冒号(:)删除
 `cat /etc/passwd | tr -d ':'`
+
+
+## wget
+`wget --no-passive-ftp ftp://username@password:xxx`
