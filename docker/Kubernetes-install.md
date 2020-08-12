@@ -168,4 +168,7 @@ kubectl get ns
 kubectl delete ns meshop-dev07
 ## 
 kubectl get node --show-labels      # 查看节点 labels
+kubectl cp  -n ingress-nginx nginx-ingress-controller-4gpxv:nginx.conf ./nginx.conf    # 从pod拷贝文件到宿主机nginx-ingress-controller-4gpxv:nginx.conf 为pod的当前目录下的nginx
 ```
+
+

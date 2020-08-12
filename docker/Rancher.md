@@ -38,6 +38,110 @@ setenforce 0
 sudo docker run -d --privileged --restart=unless-stopped --net=host -v /etc/kubernetes:/etc/kubernetes -v /var/run:/var/run rancher/rancher-agent:v2.4.5 --server https://192.168.195.133 --token zfpf5lrdxrffd8l8wvrg9zsqxgd4pbh6mwqlzj6xzz8q9rzr864k9q --ca-checksum c02dbac16c3003c0d5c94c1047a15c879eb3ef32e2ca068c7478165733914b64 --etcd --controlplane --worker
 ```
 
+
+### 3. 卸载
+```
+docker container stop $(docker container ls -a -q) && docker system prune --all --force --volumes
+docker volume rm $(docker volume ls -q)
+docker image rm $(docker image ls -q)
+rm -rf /etc/ceph \
+       /etc/cni \
+       /etc/kubernetes \
+       /opt/cni \
+       /opt/rke \
+       /run/secrets/kubernetes.io \
+       /run/calico \
+       /run/flannel \
+       /var/lib/calico \
+       /var/lib/etcd \
+       /var/lib/cni \
+       /var/lib/kubelet \
+       /var/lib/rancher/rke/log \
+       /var/log/containers \
+       /var/log/pods \
+       /var/run/calico
+
+```
+
+### 4. ceph
+```
+https://www.cnblogs.com/huchong/p/12435957.html
+https://developer.aliyun.com/article/604372
+```
++ 配置yum源(三台机器都需要)
+```
+wget -qO /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+wget -qO /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
+
+[root@node1 ~]# cat /etc/yum.repos.d/ceph.repo
+[Ceph]
+name=Ceph packages for $basearch
+baseurl=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7/$basearch
+enabled=1
+gpgcheck=0
+type=rpm-md
+gpgkey=https://mirrors.aliyun.com/ceph/keys/release.asc
+priority=1
+
+[Ceph-noarch]
+name=Ceph noarch packages
+baseurl=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7/noarch
+enabled=1
+gpgcheck=0
+type=rpm-md
+gpgkey=https://mirrors.aliyun.com/ceph/keys/release.asc
+priority=1
+
+[ceph-source]
+name=Ceph source packages
+baseurl=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7/SRPMS
+enabled=1
+gpgcheck=0
+type=rpm-md
+gpgkey=https://mirrors.aliyun.com/ceph/keys/release.asc
+priority=1
+```
+```
+yum clean all
+ceph-deploy purge   node01 node02 node03
+ceph-deploy purgedata   node01 node02 node03    # 清空
+ceph-deploy forgetkeys
+mkdir my-cluster
+cd my-cluster
+ceph-deploy new  node02 node03
+ceph-deploy install --no-adjust-repos  node01 node02 node03
+ceph-deploy --overwrite-conf mon create node01 node02 node03
+ceph-deploy admin node01 node02 node03
+
+ceph-deploy --overwrite-conf config push node01 node02 node03
+timedatectl list-timezones 或者 tzselect
+timedatectl set-timezone "Asia/Shanghai"
+```
++ 部署ceph-mgr(在node1)
+
+```
+ceph-deploy mgr create node01 
+```
++ 创建osd(在node1)
+
+```
+ceph-deploy osd create --data /dev/sdb1 node01      # /dev/sdb1不要mount
+ceph-deploy osd create --data /dev/sdb1 node02
+ceph-deploy osd create --data /dev/sdb1 node03
+```
++ 检查osd
+```
+sudo ceph health
+sudo ceph -s
+sudo ceph osd tree
+```
++ 开启MGR监控模块(root用户)
+  ```
+  ceph mgr module enable dashboard   
+  ceph dashboard create-self-signed-cert             # 要快速启动并运行仪表板，可以使用以下内置命令生成并安装自签名证书
+  ceph dashboard set-login-credentials admin admin   # 创建具有管理员角色的用户:
+  ceph mgr services                                  # 查看ceph-mgr服务 https://node1:8443/   https://192.168.195.134:8443/
+  ```
 ## 镜像加速
 vim /etc/docker/daemon.json
 ```
