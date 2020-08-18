@@ -135,7 +135,7 @@ sudo systemctl status firewalld
 
 
 ### 本地访问
-![install](https://kubernetes.io/zh/docs/tasks/tools/install-kubectl/#%e5%9c%a8-windows-%e4%b8%8a%e7%94%a8-chocolatey-%e5%ae%89%e8%a3%85-kubectl)
+[install](https://kubernetes.io/zh/docs/tasks/tools/install-kubectl/#%e5%9c%a8-windows-%e4%b8%8a%e7%94%a8-chocolatey-%e5%ae%89%e8%a3%85-kubectl)
 + 创建一个config`~/.kube/config`
 + 本地访问
 ```

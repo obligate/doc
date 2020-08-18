@@ -1,4 +1,13 @@
 ## kubernetes常用命令
+
+```
+# 集群环境相关命令
+$ kubectl vertion --short=true   #显示当前使用的客户端及服务端程序版本信息
+$ kubectl cluster-info　　　　　　#获取集群信息
+$ kubectl api-versions　　　　　　#获取当前系统的apiserver上的相关信息
+$ kubectl api-resource　　　　　　#获取api资源信
+```
+
 + `kubectl get no`                              查询节点，nodes or node or no           
 + `kubectl get cs`                              查询组件状态，componentstatuses or cs    
 + `kubectl get ns`                              查询名命空间，namespaces or ns           
