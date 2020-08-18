@@ -62,6 +62,9 @@ http://localhost:8080/api/v1/namespaces/default/pods/test-pod
 | api  | api版本 | namesapces | 所属的namespaces | 资源种类 | 所请求的资源名称 |
 | :--: | :-----: | :--------: | :--------------: | :------: | :--------------: |
 | api  |   v1    | namespaces |     default      |   pods   |     test-pod     |
+
+
+
 这里api version如果是v1的话,表示这是一个很稳定的版本了, 以后不会有大的修改,并且当前版本所支持的所有特性以后都会兼容. 而如果版本号是v1alpha1, v1beta1之类的,则不保证其稳定性
 
 
@@ -89,6 +92,7 @@ apis          /   rbac.authorization.k8s.io /  v1              /  namespaces / d
 保存创建副本的信息。用来持久化 Kubernetes 资源对象的 Key-Value 数据库。
 
 所有的api结构都可以通过访问相关断点来获取信息, 最低一层为api-server的地址, 访问结果如下:
+```
 {
   "paths": [
     "/api",
@@ -169,7 +173,7 @@ apis          /   rbac.authorization.k8s.io /  v1              /  namespaces / d
     "/version"
   ]
 }
-
+```
 ### Refer
 [relnotes](https://relnotes.k8s.io/)
 [k8s-api](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)
