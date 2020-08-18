@@ -40,7 +40,7 @@ kind代表资源对象所属的类型，而这些资源类型大体可以分为�
 k8s将api分割为多个逻辑集合，称为api群组，它们支持单独启用或禁用，并能够再次分解。apiserver支持在不同的群组中使用不同的版本，允许各组以不同的速度演进，而且也支持同一群组同时存在不同的版本，如apps/v1、apps/v1beta2、apps/v1beta1等。也因此能够在不同的群组中使用同一个资源类型。群组化管理的api使得其可以更轻松地进行扩展。  
 k8s的api以层级结构组织在一起，每个api群组表现为一个以/apis为根路径的rest路径，不过核心群组core有一个专用的简化路径“/api/v1”.目前，常用的api群组分为两类：
 核心群组：rest路径为/api/v1，在资源的配置信息apiversion字段中引用时可以不指定路径，而仅给出版本，如“apiVersion：v1”。
-命名的群组：rest路径为/apis/$GROUP_NAME/$VERSION，例如/apis/apps/v1，它在apiversion字段中引用的格式为：“apiVersion:$GROUP_NAME/$VERSION”
+命名的群组：rest路径为`/apis/$GROUP_NAME/$VERSION`，例如`/apis/apps/v1`，它在apiversion字段中引用的格式为：`“apiVersion:$GROUP_NAME/$VERSION”`
 另外，k8s还支持用户自定义资源类型，目前常用的方式由三种：修改k8s源代码自定义类型、创建一个自定义的apiserver并将其聚合至集群中、使用自定义资源
 
 ### 3. api组
@@ -56,7 +56,7 @@ at REST path `/apis/$GROUP_NAME/$VERSION`, and use apiVersion: `$GROUP_NAME/$VER
 #### 3.3. namespaced resources
 k8s的api-server组件负责提供restful api访问端点, 并且将数据持久化到etcd server中. 
 所谓的namespaced resources,就是这个resource是从属于某个namespace的, 也就是说它不是cluster-scoped的资源. 比如pod, deployment, service都属于namespaced resource. 那么我们看一下如何请求一个namespaced resources.
-http://localhost:8080/api/v1/namespaces/default/pods/test-pod
+`http://localhost:8080/api/v1/namespaces/default/pods/test-pod`
 可以看出, 该restful api的组织形式是:
 
 | api  | api版本 | namesapces | 所属的namespaces | 资源种类 | 所请求的资源名称 |
@@ -69,17 +69,18 @@ http://localhost:8080/api/v1/namespaces/default/pods/test-pod
 
 
 #### 3.4. non-namespaced resources
-http://localhost:8080/apis/rbac.authorization.k8s.io/v1/clusterroles/test-clusterrole
-这里可以观察到它clusterrole与pod不同, apis表示这是一个非核心api. rbac.authorization.k8s.io指代的是api-group, 另外它没有namespaces字段, 其他与namespaced resources类似.
+`http://localhost:8080/apis/rbac.authorization.k8s.io/v1/clusterroles/test-clusterrole`
+这里可以观察到它clusterrole与pod不同, `apis`表示这是一个非核心api. `rbac.authorization.k8s.io`指代的是`api-group`, 另外它没有namespaces字段, 其他与namespaced resources类似.
 
 #### 3.5. non-resource url
 这类资源和pod, clusterrole都不同. 例如
-http://localhost:8080/healthz/etcd
+`http://localhost:8080/healthz/etcd`
 这就是用来确认etcd服务是不是健康的.它不属于任何namespace,也不属于任何api版本.
 总结, k8s的REST API的设计结构为:
+```
 [api/apis]  /  api-group                          / api-version /  namespaces / namespace-name / resource-kind / resource-name
 apis          /   rbac.authorization.k8s.io /  v1              /  namespaces / default                  /  roles              /  test-role
-
+```
 
 ![kube-apiserver工作原理图](img/k8s_kube-apiserver-principle.png)
 - API 层
