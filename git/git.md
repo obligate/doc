@@ -46,7 +46,7 @@ $ git check-ignore -v App.class      # 可以用git check-ignore命令检查,哪
 > 一开始的时候，`master`分支是一条线，Git用`master`指向最新的提交，再用`HEAD`指向`master`，就能确定当前分支，以及当前分支的提交点。
 > 每次提交，master分支都会向前移动一步，这样，随着你不断提交，master分支的线也越来越长
 
-![0](img\0.png)
+![0](img/0.png)
 
 > 当我们创建新的分支，例如`dev`时，Git新建了一个指针叫`dev`，指向`master`相同的提交，再把`HEAD`指向`dev`，就表示当前分支在`dev`上
 > Git创建一个分支很快，因为除了增加一个dev指针，改改HEAD的指向，工作区的文件都没有任何变化
