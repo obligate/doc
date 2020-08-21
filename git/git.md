@@ -13,8 +13,17 @@ git log --oneline  --graph --all
 ### 添加多个远程仓库
 > 因为git本身是分布式版本控制系统，可以同步到另外一个远程库，当然也可以同步到另外两个远程库
 > 使用多个远程库时，我们要注意，git给远程库起的默认名称是origin，如果有多个远程库，我们需要用不同的名称来标识不同的远程库
+
+```
+# 1. 需要在本地的~/.ssh/config 添加配置信息
+Host gitee.com
+Hostname gitee.com
+User git
+IdentityFile	~/.ssh/git_pub_key
+```
 ```
 git remote rm origin                                                  # 删除远程分支origin
+git remote rename origin github                                       # 重命名，把现在的origin名称重命名成新的github
 git remote add github git@github.com:peter/learngit.git               # 远程库的名称叫github，不叫origin了
 git remote add gitee git@gitee.com:peter/learngit.git                 # 远程库的名称叫gitee，不叫origin
 git remote -v
