@@ -8,6 +8,18 @@ $ kubectl api-versions　　　　　　#获取当前系统的apiserver上的相
 $ kubectl api-resource　　　　　　#获取api资源信
 ```
 
+```
+# config相关命令
+kubectl config view                                                                      # 查看配置文件
+kubectl config current-context                                                           # 获取当前的上下文                    
+kubectl config get-contexts                                                              # 获取config中所有的contexts
+kubectl config use-context  k8s-bj                                                       # 切换上下文，将当前的上下文切换到k8s-bj
+kubectl config set-context --current --namespace meshop-tester                           # 切换命名空间，将当前上下文的命名空间切换为meshop-tester
+kubectl config set-context $(kubectl config current-context)  --namespace meshop-tester  # 切换命名空间，将当前上下文的命名空间切换为meshop-tester
+kubectl config get-contexts --no-headers | grep '*' | grep -Eo '\S+$'                    # 获取当前的namespace
+kubectl config get-contexts | sed -n "2p" | awk "{print \$5}";                           # 获取当前的namespace
+```
+
 + `kubectl get no`                              查询节点，nodes or node or no           
 + `kubectl get cs`                              查询组件状态，componentstatuses or cs    
 + `kubectl get ns`                              查询名命空间，namespaces or ns           

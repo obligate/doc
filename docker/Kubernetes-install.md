@@ -21,6 +21,7 @@
 #### 设置shell命令补全
 ```
 # yum install -y bash-completion
+# source /usr/share/bash-completion/bash_completion
 # echo "source <(kubectl completion bash)" >> ~/.bashrc
 # kubectl
 ```
@@ -149,10 +150,13 @@ kubectl delete pod my-nginx-3333          # 删除pod
 kubectl get deployments       # 查看已部署
 kubectl delete deployment my-nginx                          # 删除部署的my-nginx服务，彻底删除pod
 kubectl config view
-kubectl config current-context                         # 显示当前的上下文
-kubectl config set-context Name                        # 切换上下文，Name为contexts中某一个context的Name
+kubectl config current-context                         							# 显示当前的上下文                     
 kubectl config get-contexts
-kubectl config set-context --current --namespace test  # 切换命名空间为test
+kubectl config use-context  k8s-bj                     							# 切换上下文，当前的上下文切换到k8s-bj
+kubectl config set-context --current --namespace test  							# 切换当前上下文的命名空间为test
+kubectl config set-context $(kubectl config current-context)  --namespace test  # 切换命名空间，将当前上下文的命名空间切换为test
+kubectl config get-contexts --no-headers | grep '*' | grep -Eo '\S+$'                    # 获取当前的namespace
+kubectl config get-contexts | sed -n "2p" | awk "{print \$5}";                           # 获取当前的namespace
 kubectl get all                                        # 获取所有的
 kubectl get deployment tlz-cloud-app  -o yaml          # 查看某个deployment的yaml文件
 kubectl exec -it podName  -c  containerName -n namespace -- shell comand
@@ -169,6 +173,12 @@ kubectl delete ns meshop-dev07
 ## 
 kubectl get node --show-labels      # 查看节点 labels
 kubectl cp  -n ingress-nginx nginx-ingress-controller-4gpxv:nginx.conf ./nginx.conf    # 从pod拷贝文件到宿主机nginx-ingress-controller-4gpxv:nginx.conf 为pod的当前目录下的nginx
+# 创建alias
+$  alias kubectl='_kubectl_custom(){ if [[ "$1" == "project" && "$2" != "" ]]; then kubectl config set-context --current --namespace=$2; elif [[ "$1" == "projects" && "$2" == "" ]]; then kubectl get ns; elif [[ "$1" == "project" && "$2" == "" ]]; then kubectl config get-contexts | sed -n "2p" | awk "{print \$5}";  else kubectl $*; fi;}; _kubectl_custom'
+$ alias oc='kubectl'
+# alias 验证
+kubectl project test
+kubectl get pod
 ```
 
 
