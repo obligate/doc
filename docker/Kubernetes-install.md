@@ -182,3 +182,147 @@ kubectl get pod
 ```
 
 
+## k8s 环境搭建
+### 软件安装
+```
+master  172.31.5.246
+node1   172.31.13.91
+node2   172.31.5.102
+docker    # 每个节点都需要安装
+kubelet   # k8s的核心，不管是master还是node，都需要安装，进行容器的管理
+kubeadm   # k8s的集群管理的核心，需要在master节点安装，每个node也需要用这个命令加入集群
+kubectl   # kube命令的管理
+## 3台机器都需要安装k8s
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/  
+```
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+```
+关闭Selinux  
+```
+setenforce 0
+sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+```
+安装Kubernetes安装包  
+```
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+systemctl enable --now kubelet
+systemctl restart kubelet
+```
+```
+### 创建集群
+```
+# master执行
+kubeadm init --apiserver-advertise-address=172.31.5.246 --pod-network-cidr=10.244.0.0/16
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+# master执行
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at: 
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+# master执行
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+
+# node1，node2执行
+kubeadm join 172.31.5.246:6443 --token 80ag2v.bypypfsg39vltspg \
+    --discovery-token-ca-cert-hash sha256:e2eccf68f5467011a9b45a552e813b5ce4df1ad00161b435386add78aa0fb4fa 
+
+
+
+```
+
+#### error
+```
+[root@master mnt]# kubeadm init --apiserver-advertise-address=172.31.5.246 --pod-network-cidr=10.244.0.0/16
+W0830 03:15:49.745333   25160 configset.go:348] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]
+[init] Using Kubernetes version: v1.19.0
+[preflight] Running pre-flight checks
+        [WARNING Service-Docker]: docker service is not enabled, please run 'systemctl enable docker.service'
+        [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
+        [WARNING Hostname]: hostname "master" could not be reached
+        [WARNING Hostname]: hostname "master": lookup master on 172.31.0.2:53: no such host
+error execution phase preflight: [preflight] Some fatal errors occurred:
+        [ERROR FileContent--proc-sys-net-bridge-bridge-nf-call-iptables]: /proc/sys/net/bridge/bridge-nf-call-iptables contents are not set to 1
+[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+To see the stack trace of this error execute with --v=5 or higher
+```
+> 解决方法 `echo "1" >/proc/sys/net/bridge/bridge-nf-call-iptables`
+
+
+
+### 测试集群
+#### pod
+```
+[root@master ~]# vim mynginx-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mynginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.7.9
+```
+```
+[root@master ~]# kubectl apply -f mynginx-pod.yaml
+[root@master ~]# kubectl describe pod mynginx
+[root@master ~]# kubectl get pod -o wide
+[root@master ~]# kubectl exec mynginx -- ls /              # 非交互式执行命令
+[root@master ~]# kubectl exec -it mynginx -- sh            # 交互式进入pod中的容器
+[root@master ~]# kubectl exec -it mynginx -- /bin/bash
+```
+#### depolyment
+注：部分小伙伴的Kubernetes版本较新的可以采用apiVersion: apps/v1或者apiVersion: apps/v1beta1来部署Deployment。  
+```
+[root@master ~]# cat mynginx-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: web_server
+  template:
+    metadata:
+      labels:
+        app: web_server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+```
+```
+[root@master ~]# kubectl apply -f mynginx-deployment.yaml
+[root@master ~]# kubectl get deployment
+[root@master ~]# kubectl describe deployment nginx-deployment
+[root@master ~]# kubectl get pods
+[root@master ~]# kubectl get pods -o wide
+# 通过edit修改动态文件,replicas: 4
+[root@master ~]# kubectl edit deployment nginx-deployment
+[root@master ~]# kubectl get deployment
+[root@master ~]# kubectl describe deployment nginx-deployment
+# 通过vi修改静态文件 replicas: 3
+[root@master ~]#  vim mynginx-deployment.yaml
+[root@master ~]#  kubectl apply -f mynginx-deployment.yaml
+```
+
