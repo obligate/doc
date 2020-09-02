@@ -326,6 +326,12 @@ spec:
 [root@master ~]#  kubectl apply -f mynginx-deployment.yaml
 # 通过deployment的scale命令实现pod的stop
 [root@master ~]#  kubectl scale  --replicas=0 deployment/nginx-deployment
+# deployment -> replicaset -> pod
+# 通过describe命令查看他们之间的关系
+[root@master ~]#  kubectl get deployment
+[root@master ~]#  kubectl scale  --replicas=5 deployment/nginx-deployment
+[root@master ~]#  kubectl get deployment
+[root@master ~]#  kubectl get replicaset
 ```
 #### nodeSelector来选择指定的node
 > 给指定的node添加label,通过nodeSelector来选择指定的node

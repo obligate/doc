@@ -88,3 +88,115 @@ kubectl delete pod mynginx
 kubectl apply -f mynginx-pod-selector.yaml
 kubectl get pod -o wide
 ```
+
+### deployment的滚动升级
+> 1.deployment的yml
+```
+[root@master ~]# cat mynginx-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: web_server
+  template:
+    metadata:
+      labels:
+        app: web_server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+```
+```
+kubectl apply -f mynginx-deployment.yaml
+```
+> 2. 修改nginx版本为1.7.10
+```
+[root@master ~]# cat mynginx-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: web_server
+  template:
+    metadata:
+      labels:
+        app: web_server
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.10   # 修改nginx版本为1.7.10
+```
+> 3 deployment滚动升级和undo
+```
+kubectl rollout history deployment                  # 查看deployment的历史版本，发现record没有，可以通过--record命令
+kubectl apply -f mynginx-deployment.yaml  --record
+kubectl get pod                                    # 最终deployment滚动升级之后，只会保留replicas的数量
+kubectl rollout history deployment 
+kubectl rollout undo deployment --to-revision=1    # 回滚到deployment的第一个版本
+```
+
+
+### daemonset
+```
+kubectl get daemonset -n kube-system
+kubectl edit daemonset kube-proxy  -n kube-system            #查看和编辑daemonset的yml文件
+kubectl get pods --namespace=kube-system -o wide|grep kube-proxy     #查看daemonset的pods
+```
+
+### 作业发布
+```
+[root@master ~]# cat hello-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  template:
+    metadata:
+      name: hello
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        command: ["echo", "hello from job"]
+      restartPolicy: Never
+```
+> batch job操作
+```
+kubectl apply -f hello-job.yaml
+kubectl get job
+kubectl get pods
+kubectl logs pod名称
+```
+>Cronjob
+```
+[root@master ~]# cat mycronjob.yaml
+apiVersion: batch/v2alpha1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            command: ["echo", "hello cronjob"]
+          restartPolicy: Never
+```
+> cronjob 操作
+```
+
+```

@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  template:
+    metadata:
+      name: hello
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        command: ["echo", "hello from feiyang"]
+      restartPolicy: Never
