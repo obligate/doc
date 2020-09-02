@@ -190,8 +190,8 @@ node1   172.31.13.91
 node2   172.31.5.102
 docker    # 每个节点都需要安装
 kubelet   # k8s的核心，不管是master还是node，都需要安装，进行容器的管理
-kubeadm   # k8s的集群管理的核心，需要在master节点安装，每个node也需要用这个命令加入集群
-kubectl   # kube命令的管理
+kubeadm   # k8s的集群管理的核心,每个节点都需要安装，node1,node2也需要用这个命令加入集群
+kubectl   # kube命令的管理，每个节点需要安装
 ## 3台机器都需要安装k8s
 https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/  
 ```
@@ -324,5 +324,25 @@ spec:
 # 通过vi修改静态文件 replicas: 3
 [root@master ~]#  vim mynginx-deployment.yaml
 [root@master ~]#  kubectl apply -f mynginx-deployment.yaml
+# 通过deployment的scale命令实现pod的stop
+[root@master ~]#  kubectl scale  --replicas=0 deployment/nginx-deployment
+```
+#### nodeSelector来选择指定的node
+> 给指定的node添加label,通过nodeSelector来选择指定的node
+> 1.给指定的node添加label
+```
+[root@master ~]#  kubectl get node --show-labels
+[root@master ~]#  Kubectl label node node1 disktype=ssd   # 给node1机器添加label，disktype=ssd
+```
+> 2.修改mynginx-pod-selector.yaml文件，添加：  
+```
+      nodeSelector:
+        disktype: ssd
+```
+>3.再执行命令：  
+```
+kubectl delete pod mynginx
+kubectl apply -f mynginx-pod-selector.yaml
+kubectl get pod -o wide
 ```
 
