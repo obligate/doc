@@ -10,6 +10,7 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 > 参考: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
+> 参考: https://kubernetes.io/docs/concepts/cluster-administration/addons/
 ```
 # master执行
 kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/canal.yaml
@@ -136,4 +137,33 @@ kubectl run busybox --rm -it --labels="access=true" --image=busybox -- /bin/sh
 /# wget 10.103.17.169:8080      # 可以访问，busybox因为添加了label="access=true"，可以改pod可以访问service
 /# wget nginx-svc.default:8080
 [root@master mnt]# curl 10.103.17.169:8080    # 可以访问，设置了ipBlock的cidr的地址段，如果不设置，则访问失败
+```
+
+## 异常排除
+### pod状态异常
+```
+pod status: Init:CrashLoopBackOff
+#解决方法
+关闭SELinux
+/etc/selinux/config: SELINUX=disable 或者 setenforce 0
+```
+### pod状态正常，但无法解析dns
+```
+iptables -P FORWARD ACCEPT
+kubectl get svc kube-dns -n kube-system
+kubectl get ep  kube-dns -n kube-system
+```
+
+### DNS正常，服务不可达
+```
+kubectl get endpoints <service-name>
+Pod和Service的Label不一致
+Service的容器端口错误
+```
+
+### Kubernetes API不可达
+```
+kubectl get service kubernetes
+kubectl get endpoints kubernetes
+RBAC
 ```
