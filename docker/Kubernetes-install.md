@@ -194,7 +194,7 @@ kubeadm   # k8s的集群管理的核心,每个节点都需要安装，node1,node
 kubectl   # kube命令的管理，每个节点需要安装
 ## 3台机器都需要安装k8s
 https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/  
-```
+# kubernetes.repo
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -205,18 +205,16 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
 ```
-关闭Selinux  
+> 关闭Selinux  
 ```
 setenforce 0
 sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 ```
-安装Kubernetes安装包  
+> 安装Kubernetes安装包  
 ```
 yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
-
 systemctl enable --now kubelet
 systemctl restart kubelet
-```
 ```
 ### 创建集群
 ```

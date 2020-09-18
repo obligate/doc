@@ -92,3 +92,71 @@ vim index.html
 + 重新载入
 如果要重新载入 NGINX 可以使用以下命令发送 HUP 信号到容器 `docker kill -s HUP container-name`
 重启重启 NGINX 容器命令 `docker restart container-name`
+
+
+
+
+## wsl
+> 安装docker后，docker会自动创建2个发行版：
+>  docker-desktop
+>  docker-desktop-data
+> `wsl -l -v `  查看wsl
+> WSL发行版默认都是安装在C盘，在%LOCALAPPDATA%/Docker/wsl目录
+> docker的运行数据、镜像文件都存在%LOCALAPPDATA%/Docker/wsl/data/ext4.vhdx中
+```
+wsl -l 查看已安装发行版本
+wsl -d <DistributionName> # 启动执行的发行版本  使用 wsl -d centos 启动centos
+wsl -s <DistributionName> 将发行版本设置为默认值
+wsl -t <DistributionName> 终止分发
+wsl --unregister <DistributionName> 注销分发
+wsl --help 显示帮助
+```
+```
+cd C:\Users\Peter
+wsl --export Ubuntu ubuntu.tar
+wsl --import Ubuntu2001 .\Ubuntu2001 ubuntu.tar  
+wsl --import Ubuntu2002 .\Ubuntu2002 ubuntu.tar  --version 2
+wsl --import Ubuntu2003 .\Ubuntu2003 ubuntu.tar  --version 2
+wsl -d Ubuntu2001
+```
+### win10使用WSL 2运行Docker Desktop，运行文件从C盘迁移到其他目录
+```
+1.首先关闭docker
+2.关闭所有发行版：
+wsl --shutdown
+3.将docker-desktop-data导出到D:\wsl\docker-desktop-data\docker-desktop-data.tar（注意，原有的docker images不会一起导出）
+wsl --export docker-desktop-data D:\wsl\docker-desktop-data\docker-desktop-data.tar
+
+4.注销docker-desktop-data：
+wsl --unregister docker-desktop-data
+
+5.重新导入docker-desktop-data到要存放的文件夹：D:\wsl\docker-desktop-data\：
+wsl --import docker-desktop-data D:\wsl\docker-desktop-data\ D:\wsl\docker-desktop-data\docker-desktop-data.tar --version 2
+
+只需要迁移docker-desktop-data一个发行版就行，另外一个不用管，它占用空间很小。
+
+完成以上操作后，原来的%LOCALAPPDATA%/Docker/wsl/data/ext4.vhdx就迁移到新目录了
+```
+
+### 安装centos
+> 1.开启WSL
+> 2.下载centos镜像文件，[下载](https://links.jianshu.com/go?to=https%3A%2F%2Fraw.githubusercontent.com%2FCentOS%2Fsig-cloud-instance-images%2Fa77b36c6c55559b0db5bf9e74e61d32ea709a179%2Fdocker%2Fcentos-7-docker.tar.xz)
+> 3. 安装chocolatey
+```
+通过cmd.exe安装
+@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+通过 PowerShell.exe安装
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+choco upgrade chocolatey       # 升级Chocolatey
+choco search 关键字            #  搜索
+choco install 软件包名称        # 安装
+choco upgrade 软件包名称        # update
+choco uninstall 软件包名称      # uninstall
+```
+> 4. 使用chocolatey安装LxRunOffline
+`cinst LxRunOffline -y`
+> 5. 使用LxRunOffline安装CentOS,使用cmd
+`LxRunOffline.exe  install -n centos -d D:\WslData\docker-desktop-data\CentOS -f  F:\Software\wslimages\centos-7-docker.tar.xz`
+> 其中 -d 后面是要安装到的目录； -f 后面是第二部下载的镜像存放位置；-n 用来指定名称
+> 安装完成之后，使用LxRunOffine 来开启 Centos `LxRunOffline run -n centos`,如果，你只安装了一个WSL，那么直接在cmder输入wsl即可启动CentOS了。
+> 卸载centos `LxRunOffline ur -n centos`  
